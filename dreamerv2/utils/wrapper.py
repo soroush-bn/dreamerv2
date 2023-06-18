@@ -32,6 +32,7 @@ class GymMinAtar(gym.Env):
         if mode == 'rgb_array':
             return self.env.state()
         elif mode == 'human':
+            # print("bonjooor")
             self.env.display_state(self.display_time)
 
     def close(self):
@@ -138,7 +139,16 @@ class OneHotAction(gym.Wrapper):
 
     def reset(self):
         return self.env.reset()
-    
+
+
+    # def render(self, mode="human", **kwargs):
+    #     self.env.game.display_state(50)
+    #     return super().render(mode, **kwargs)
+    #
+    # def close(self):
+    #     self.env.game.close_display()
+    #     return super().close()
+
     def _sample_action(self):
         actions = self.env.action_space.shape[0]
         index = np.random.randint(0, actions)

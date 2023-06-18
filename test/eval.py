@@ -3,9 +3,13 @@ import os
 import torch
 import numpy as np
 import gym
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from dreamerv2.utils.wrapper import GymMinAtar, OneHotAction, breakoutPOMDP, space_invadersPOMDP, seaquestPOMDP, asterixPOMDP, freewayPOMDP
 from dreamerv2.training.config import MinAtarConfig
 from dreamerv2.training.evaluator import Evaluator
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 pomdp_wrappers = {
     'breakout':breakoutPOMDP,

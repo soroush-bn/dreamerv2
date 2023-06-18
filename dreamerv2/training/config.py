@@ -89,7 +89,7 @@ class MiniGridConfig():
     batch_size: int = 50
     seq_len: int = 8
     eval_episode: int = 5
-    eval_render: bool = False
+    eval_render: bool = True
     save_every: int = int(5e4)
     seed_episodes: int = 5
     model_dir: int = 'results'

@@ -4,6 +4,9 @@ import os
 import torch
 import numpy as np
 import gym
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from dreamerv2.utils.wrapper import GymMinAtar, OneHotAction
 from dreamerv2.training.config import MinAtarConfig
 from dreamerv2.training.trainer import Trainer
@@ -51,7 +54,7 @@ def main(args):
     trainer = Trainer(config, device)
     evaluator = Evaluator(config, device)
 
-    with wandb.init(project='mastering MinAtar with world models', config=config_dict):
+    with wandb.init(entity="soroush-baghernezhad3",project='mastering MinAtar with world models', config=config_dict):
         """training loop"""
         print('...training...')
         train_metrics = {}

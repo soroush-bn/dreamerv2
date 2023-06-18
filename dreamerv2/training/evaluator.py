@@ -67,7 +67,7 @@ class Evaluator(object):
                     prev_rssmstate = posterior_rssm_state
                     prev_action = action
                 next_obs, rew, done, _ = env.step(action.squeeze(0).cpu().numpy())
-                if self.config.eval_render:
+                if False:
                     env.render()
                 score += rew
                 obs = next_obs
