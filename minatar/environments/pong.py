@@ -2,6 +2,8 @@
 # Authors:                                                                                                     #
 # Soroush Baghernezhad                                                                              #
 ################################################################################################################
+import random
+
 import numpy as np
 
 
@@ -49,6 +51,7 @@ class Env:
         if (self.ball_y == 9 and self.ball_dy > 0): self.ball_dy = -1
         self.ball_x += self.ball_dx
         self.ball_y += self.ball_dy
+
         #  check for collision
         if self.ball_x == 0 or self.ball_x == 9:
             self.ball_dx *= -1
@@ -66,9 +69,7 @@ class Env:
                 elif self.ball_x == self.paddle_computer_x + 1:
                     self.ball_dy = 1
                     self.ball_dx = 1
-            else:
-                self.goal_player += 1
-                r += 1
+
         elif self.ball_y == 8:
             if self.ball_x in range(self.paddle_player_x - 1, self.paddle_player_x + 2):
                 if self.ball_x == self.paddle_player_x:
@@ -79,8 +80,16 @@ class Env:
                 elif self.ball_x == self.paddle_player_x + 1:
                     self.ball_dy = -1
                     self.ball_dx = 1
-            else:
-                self.goal_computer += 1
+
+        if self.ball_y == 0:
+            self.goal_player += 1
+            r += 1
+            # print("1" + str(self.ball_y))
+            self.reset_after_goal()
+        elif self.ball_y == 9:
+            self.goal_computer += 1
+            # print("2" + str(self.ball_y))
+            self.reset_after_goal()
 
         if self.goal_computer == 21 or self.goal_player == 21:
             self.terminal = True
@@ -97,6 +106,7 @@ class Env:
         state[self.ball_x, self.ball_y, self.channels['ball']] = 1
         state[self.paddle_player_x - 1:self.paddle_player_x + 2, 9, self.channels['paddle_player']] = 1
         state[self.paddle_computer_x - 1:self.paddle_computer_x + 2, 0, self.channels['paddle_computer']] = 1
+        # print("p:" + str(self.goal_player) + "c:" + str(self.goal_computer))
         return state
 
     # Reset to start state for new episode
@@ -106,15 +116,21 @@ class Env:
 
         self.ball_x = 4
         self.ball_y = 4
-        self.ball_dx = +1
-        self.ball_dy = +1
+        self.ball_dx = random.choice([+1, -1])
+        self.ball_dy = random.choice([+1, -1])
         # refer to x_center from the 3pixel of the paddle
         # ranging between 1 to 8
         self.paddle_player_x = 5
         self.paddle_computer_x = 5
         self.paddle_computer_dx = +1
-        self.goal_player = False
-        self.goal_computer = False
+        self.goal_player = 0
+        self.goal_computer = 0
+
+    def reset_after_goal(self):
+        self.ball_x = 4
+        self.ball_y = 4
+        self.ball_dx = random.choice([+1, -1])
+        self.ball_dy = random.choice([+1, -1])
 
     # Dimensionality of the game-state (10x10xn)
     def state_shape(self):
