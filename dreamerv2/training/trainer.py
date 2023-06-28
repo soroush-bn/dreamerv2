@@ -68,8 +68,8 @@ class Trainer(object):
         std_targ = []
 
         for i in range(self.collect_intervals):
-            obs, actions, rewards, terms = self.buffer.sample()
-            obs = torch.tensor(obs, dtype=torch.float32).to(self.device)                         #t, t+seq_len 
+            obs, actions, rewards, terms = self.buffer.sample() # az bufferi ke bala sakhte  sample migire
+            obs = torch.tensor(obs, dtype=torch.float32).to(self.device)                         #t, t+seq_len
             actions = torch.tensor(actions, dtype=torch.float32).to(self.device)                 #t-1, t+seq_len-1
             rewards = torch.tensor(rewards, dtype=torch.float32).to(self.device).unsqueeze(-1)   #t-1 to t+seq_len-1
             nonterms = torch.tensor(1-terms, dtype=torch.float32).to(self.device).unsqueeze(-1)  #t-1 to t+seq_len-1
@@ -161,7 +161,7 @@ class Trainer(object):
         }
 
         return actor_loss, value_loss, target_info
-
+    # aya be in scenario loss ezasfe konim ????
     def representation_loss(self, obs, actions, rewards, nonterms):
 
         embed = self.ObsEncoder(obs)                                         #t to t+seq_len   

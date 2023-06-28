@@ -1,5 +1,5 @@
 import numpy as np
-import torch 
+import torch     
 from dreamerv2.models.actor import DiscreteActionModel
 from dreamerv2.models.rssm import RSSM
 from dreamerv2.models.dense import DenseModel
