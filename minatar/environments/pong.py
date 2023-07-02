@@ -109,6 +109,10 @@ class Env:
         # print("p:" + str(self.goal_player) + "c:" + str(self.goal_computer))
         return state
 
+    def compact_state(self):
+        compact_state = self.state()[:, :, 0] | self.state()[:, :, 1] | self.state()[:, :, 2]
+        compact_state = np.expand_dims(compact_state,axis=2)
+        return compact_state
     # Reset to start state for new episode
     def reset(self):
 
@@ -135,7 +139,8 @@ class Env:
     # Dimensionality of the game-state (10x10xn)
     def state_shape(self):
         return [10, 10, len(self.channels)]
-
+    def compact_state_shape(self):
+        return [10,10,1]
     # Subset of actions that actually have a unique impact in this environment
     def minimal_action_set(self):
         minimal_actions = ['n', 'l', 'r']

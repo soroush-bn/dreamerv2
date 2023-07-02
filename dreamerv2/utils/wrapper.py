@@ -10,20 +10,20 @@ class GymMinAtar(gym.Env):
         self.env_name = env_name
         self.env = minatar.Environment(env_name) 
         self.minimal_actions = self.env.minimal_action_set()
-        h,w,c = self.env.state_shape()
+        h,w,c = self.env.compact_state_shape()
         self.action_space = gym.spaces.Discrete(len(self.minimal_actions))
         self.observation_space = gym.spaces.MultiBinary((c,h,w))
 
     def reset(self):
         self.env.reset()
-        return self.env.state().transpose(2, 0, 1)
+        return self.env.compact_state().transpose(2, 0, 1)
     
     def step(self, index):
         '''index is the action id, considering only the set of minimal actions'''
         action = self.minimal_actions[index]
         r, terminal = self.env.act(action)
         self.game_over = terminal
-        return self.env.state().transpose(2, 0, 1), r, terminal, {}
+        return self.env.compact_state().transpose(2, 0, 1), r, terminal, {}
 
     def seed(self, seed='None'):
         self.env = minatar.Environment(self.env_name, random_seed=seed)

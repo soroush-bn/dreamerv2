@@ -31,7 +31,7 @@ class BaseEnv(gym.Env):
 
         self.action_space = spaces.Discrete(len(self.action_set))
         self.observation_space = spaces.Box(
-            0, 1, shape=self.game.state_shape(), dtype=np.uint8
+            0, 1, shape=self.game.compact_state_shape(), dtype=np.uint8
         )
 
     def step(self, action):
@@ -39,7 +39,7 @@ class BaseEnv(gym.Env):
         reward, done = self.game.act(action)
         if self.render_mode == "human":
             self.render()
-        return self.game.state(), reward, done, False, {}
+        return self.game.compact_state(), reward, done, False, {}
 
     def seed(self, seed=None):
         self.game.seed(seed)
@@ -50,7 +50,7 @@ class BaseEnv(gym.Env):
         self.game.reset()
         if self.render_mode == "human":
             self.render()
-        return self.game.state(), {}
+        return self.game.compact_state(), {}
 
     def render(self):
         if self.render_mode is None:

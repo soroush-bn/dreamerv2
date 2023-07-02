@@ -60,6 +60,12 @@ class Environment:
     def state_shape(self):
         return self.env.state_shape()
 
+    def compact_state(self):
+        compact_state = self.state()[:, :, 0] | self.state()[:, :, 1] | self.state()[:, :, 2]
+        compact_state = np.expand_dims(compact_state, axis=2)
+        return compact_state
+    def compact_state_shape(self):
+        return self.env.compact_state_shape()
     # All MinAtar environments have 6 actions
     def num_actions(self):
         return 6

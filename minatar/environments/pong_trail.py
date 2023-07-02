@@ -111,7 +111,10 @@ class Env:
 
         # print("p:" + str(self.goal_player) + "c:" + str(self.goal_computer))
         return state
-
+    def state_shape(self):
+        return [10, 10, len(self.channels)]
+    def compact_state_shape(self):
+        return [10,10,1]
     # Reset to start state for new episode
     def reset(self):
 

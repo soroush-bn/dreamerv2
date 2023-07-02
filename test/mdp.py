@@ -54,7 +54,7 @@ def main(args):
     trainer = Trainer(config, device)
     evaluator = Evaluator(config, device)
 
-    with wandb.init(entity="soroush-baghernezhad3",project='dreamerv2-pong-trail', config=config_dict):
+    with wandb.init(entity="soroush-baghernezhad3",project='dreamerv2-pong-channel-stacked', config=config_dict):
         """training loop"""
         print('...training...')
         train_metrics = {}
@@ -120,7 +120,7 @@ if __name__ == "__main__":
 
     """there are tonnes of HPs, if you want to do an ablation over any particular one, please add if here"""
     parser = argparse.ArgumentParser()
-    parser.add_argument("--env", type=str, help='mini atari env name')
+    parser.add_argument("--env",default='pong', type=str, help='mini atari env name')
     parser.add_argument("--id", type=str, default='0', help='Experiment ID')
     parser.add_argument('--seed', type=int, default=123, help='Random seed')
     parser.add_argument('--device', default='cuda', help='CUDA or CPU')
