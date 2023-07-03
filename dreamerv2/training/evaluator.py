@@ -4,6 +4,10 @@ from dreamerv2.models.actor import DiscreteActionModel
 from dreamerv2.models.rssm import RSSM
 from dreamerv2.models.dense import DenseModel
 from dreamerv2.models.pixel import ObsDecoder, ObsEncoder
+import gym
+
+from dreamerv2.utils import OneHotAction
+
 
 class Evaluator(object):
     '''
@@ -52,9 +56,12 @@ class Evaluator(object):
     def eval_saved_agent(self, env, model_path):
         self.load_model(self.config, model_path)
         eval_episode = self.config.eval_episode
-        eval_scores = []    
+        eval_scores = []
+        # env = gym.make("Pong-v0",render_mode= "rgb_array")
+        # env = OneHotAction(env)
         for e in range(eval_episode):
             obs, score = env.reset(), 0
+            # obs = three_channel_converter(obs)
             done = False
             prev_rssmstate = self.RSSM._init_rssm_state(1)
             prev_action = torch.zeros(1, self.action_size).to(self.device)
@@ -70,8 +77,54 @@ class Evaluator(object):
                 if False:
                     env.render()
                 score += rew
-                obs = next_obs
+                obs = three_channel_converter(next_obs)
             eval_scores.append(score)
         print('average evaluation score for model at ' + model_path + ' = ' +str(np.mean(eval_scores)))
         env.close()
         return np.mean(eval_scores)
+def three_channel_converter(obs):
+  channeled = np.zeros((3, 10, 10))
+  compact = convert_to_compact(obs)
+  compact = compact / 255
+  channeled[0, :, 0] = compact[:, 1]
+  channeled[1, :, 9] = compact[:, 8]
+  channeled[2] = compact
+  channeled[2, :, 1] = 0
+  channeled[2, :, 8] = 0
+  return  channeled
+def convert_to_compact(frame):
+  p_obs = preprocess_single(frame)
+  bw_obs = make_bw_frame(p_obs)
+  converted_obs = conv2dpong(bw_obs)
+  return converted_obs
+
+def make_bw_frame(p_obs):
+  p_obs=p_obs.astype(int)
+  ball_index= np.where(p_obs==158)
+  pads_index_right =np.where(p_obs==61)
+  pads_index_left =np.where(p_obs==45)
+  bw_obs=np.zeros(p_obs.shape)
+  bw_obs[ball_index]= 255
+  bw_obs[pads_index_right]= 255
+  bw_obs[pads_index_left]= 255
+  return bw_obs
+
+
+def conv2dpong(input):
+  conv= np.zeros((10,10))
+  i=0
+  j=0
+# for c in range(100):
+  for i in range(10):
+    for j in range(10):
+        conv[i,j]=input[i*8:(i+1)*8,j*8:(j+1)*8].sum()
+
+  conv[np.where(conv>0)]=255
+  return conv
+# plt.imshow(conv)
+
+
+def preprocess_single(image, bkg_color = np.array([144, 72, 17])):
+    #print('image[34:-16:2,::2].shape: ', image[34:-16:2,::2].shape)
+    img = np.mean(image[34:-16:2,::2]-bkg_color, axis=-1)
+    return img

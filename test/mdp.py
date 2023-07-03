@@ -53,8 +53,8 @@ def main(args):
     config_dict = config.__dict__
     trainer = Trainer(config, device)
     evaluator = Evaluator(config, device)
-
-    with wandb.init(entity="soroush-baghernezhad3",project='dreamerv2-pong-trail-channel-stacked', config=config_dict):
+    wandb_name = 'dreamerv2-' + exp_id
+    with wandb.init(entity="soroush-baghernezhad3",project=wandb_name, config=config_dict):
         """training loop"""
         print('...training...')
         train_metrics = {}
