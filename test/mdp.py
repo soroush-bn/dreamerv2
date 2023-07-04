@@ -7,7 +7,7 @@ import gym
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from dreamerv2.utils.wrapper import GymMinAtar, OneHotAction
+from dreamerv2.utils.wrapper import GymMinAtar, OneHotAction,GymMinAtarCompact
 from dreamerv2.training.config import MinAtarConfig
 from dreamerv2.training.trainer import Trainer
 from dreamerv2.training.evaluator import Evaluator
@@ -16,7 +16,8 @@ def main(args):
     wandb.login()
     env_name = args.env
     exp_id = args.id
-
+    compact = True if args.compact == 1 else False
+    real_gym = True if args.gym== 1 else False
     '''make dir for saving results'''
     result_dir = os.path.join('results', '{}_{}'.format(env_name, exp_id))
     model_dir = os.path.join(result_dir, 'models')                                                  #dir to save learnt models
@@ -29,9 +30,12 @@ def main(args):
         torch.cuda.manual_seed(args.seed)
     else:
         device = torch.device('cpu')
-    print('using :', device)  
-    
-    env = OneHotAction(GymMinAtar(env_name))
+    print('using :', device)
+
+    if compact:
+        env = OneHotAction(GymMinAtarCompact(env_name))
+    else:
+        env = OneHotAction(GymMinAtar(env_name))
     obs_shape = env.observation_space.shape
     action_size = env.action_space.shape[0]
     obs_dtype = bool
@@ -126,5 +130,7 @@ if __name__ == "__main__":
     parser.add_argument('--device', default='cuda', help='CUDA or CPU')
     parser.add_argument('--batch_size', type=int, default=50, help='Batch size')
     parser.add_argument('--seq_len', type=int, default=50, help='Sequence Length (chunk length)')
+    parser.add_argument("--gym", type=int, default=0, help="run real gym env or minatar")
+    parser.add_argument("--compact", type=int, default=1, help="run compact or channeled")
     args = parser.parse_args()
     main(args)

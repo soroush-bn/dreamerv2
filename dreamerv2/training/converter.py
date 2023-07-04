@@ -14,9 +14,14 @@ def three_channel_converter(obs):
 
 
 def convert_to_compact(frame):
+    result = np.zeros((10, 10))
     p_obs = preprocess_single(frame)
     bw_obs = make_bw_frame(p_obs)
     converted_obs = conv2dpong(bw_obs)
+    result[:, 0] = converted_obs[:, 1]
+
+    result[:, 9] = converted_obs[:, 8]
+
     return converted_obs
 
 

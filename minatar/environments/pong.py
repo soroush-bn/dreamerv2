@@ -102,7 +102,6 @@ class Env:
             print(self.goal_computer)
             print(self.goal_player)
             self.terminal = True
-        print(r)
         return r, self.terminal
 
     # Query the current level of the difficulty ramp, difficulty does not ramp in this game, so return None

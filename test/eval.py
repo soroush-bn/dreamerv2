@@ -6,7 +6,7 @@ import numpy as np
 import torch
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from dreamerv2.utils.wrapper import GymMinAtar, OneHotAction, breakoutPOMDP, space_invadersPOMDP, seaquestPOMDP, \
+from dreamerv2.utils.wrapper import GymMinAtar,GymMinAtarCompact, OneHotAction, breakoutPOMDP, space_invadersPOMDP, seaquestPOMDP, \
     asterixPOMDP, freewayPOMDP
 from dreamerv2.training.config import MinAtarConfig
 from dreamerv2.training.evaluator import Evaluator
@@ -24,15 +24,23 @@ pomdp_wrappers = {
 
 def main(args):
     print(args)
+    compact = True if args.compact == 1 else False
+    real_gym = True if args.gym== 1 else False
     env_name = args.env
     if args.pomdp == 1:
         exp_id = args.id + '_pomdp'
         PomdpWrapper = pomdp_wrappers[env_name]
-        env = PomdpWrapper(OneHotAction(GymMinAtar(env_name)))
+        if compact:
+            env = PomdpWrapper(OneHotAction(GymMinAtarCompact(env_name)))
+        else:
+            env = PomdpWrapper(OneHotAction(GymMinAtar(env_name)))
         print('using partial state info')
     else:
         exp_id = args.id
-        env = OneHotAction(GymMinAtar(env_name))
+        if compact:
+            env = OneHotAction(GymMinAtarCompact(env_name))
+        else :
+            env = OneHotAction(GymMinAtar(env_name))
         print('using complete state info')
 
     if args.eval_episode == 1:
@@ -65,7 +73,7 @@ def main(args):
         eval_render=eval_render
     )
 
-    evaluator = Evaluator(config, device)
+    evaluator = Evaluator(config, device,compact,real_gym)
     best_score = 0
 
     for f in sorted(os.listdir(model_dir)):
@@ -85,6 +93,8 @@ if __name__ == "__main__":
     parser.add_argument("--id", type=str, default='0', help='Experiment ID')
     parser.add_argument("--eval_render", default=0, type=int, help='to render while evaluation')
     parser.add_argument("--pomdp", default=0, type=int, help='partial observation flag')
+    parser.add_argument("--gym", type=int, default=0, help="run real gym env or minatar")
+    parser.add_argument("--compact", type=int, default=0, help="run compact or channeled")
     parser.add_argument('--device', default='cuda', help='CUDA or CPU')
     args = parser.parse_args()
     main(args)
