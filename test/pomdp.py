@@ -67,7 +67,7 @@ def main(args):
 
     config_dict = config.__dict__
     trainer = Trainer(config, device)
-    evaluator = Evaluator(config, device)
+    evaluator = Evaluator(config, device,compact,real_gym)
 
     with wandb.init(project='mastering MinAtar with world models', config=config_dict):
         """training loop"""

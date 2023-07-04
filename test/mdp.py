@@ -56,7 +56,7 @@ def main(args):
 
     config_dict = config.__dict__
     trainer = Trainer(config, device)
-    evaluator = Evaluator(config, device)
+    evaluator = Evaluator(config, device,compact,real_gym)
     wandb_name = 'dreamerv2-' + exp_id
     with wandb.init(entity="soroush-baghernezhad3",project=wandb_name, config=config_dict):
         """training loop"""
