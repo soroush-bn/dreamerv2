@@ -2,8 +2,10 @@
 # Authors:                                                                                                     #
 # Soroush Baghernezhad                                                                              #
 ################################################################################################################
-import numpy as np
 import random
+
+import numpy as np
+
 
 #####################################################################################################################
 # Env
@@ -35,11 +37,16 @@ class Env:
             self.paddle_player_x = max(1, self.paddle_player_x - 1)
         elif (a == 'l'):
             self.paddle_player_x = min(8, self.paddle_player_x + 1)
-
+        elif (a == 'n'):
+            pass
         # computer movement
         if (self.paddle_computer_x == 8 and self.paddle_computer_dx == 1) or (
                 self.paddle_computer_x == 1 and self.paddle_computer_dx == -1):
             self.paddle_computer_dx *= -1
+        else:
+            p = random.random()
+            if p < 0.25:
+                self.paddle_computer_dx *= -1
         self.paddle_computer_x += self.paddle_computer_dx
 
         # Update ball position
@@ -89,10 +96,13 @@ class Env:
             self.reset_after_goal()
         elif self.ball_y == 9:
             self.goal_computer += 1
+            r-=1
             # print("2" + str(self.ball_y))
             self.reset_after_goal()
 
         if self.goal_computer == 21 or self.goal_player == 21:
+            print(self.goal_computer)
+            print(self.goal_player)
             self.terminal = True
 
         return r, self.terminal
@@ -105,16 +115,24 @@ class Env:
     def state(self):
         state = np.zeros((10, 10, len(self.channels)), dtype=bool)
         state[self.ball_x, self.ball_y, self.channels['ball']] = 1
-        state[self.last_x,self.last_y,self.channels['trail']] = 1
+        state[self.last_x, self.last_y, self.channels['trail']] = 1
         state[self.paddle_player_x - 1:self.paddle_player_x + 2, 9, self.channels['paddle_player']] = 1
         state[self.paddle_computer_x - 1:self.paddle_computer_x + 2, 0, self.channels['paddle_computer']] = 1
 
         # print("p:" + str(self.goal_player) + "c:" + str(self.goal_computer))
         return state
+
     def state_shape(self):
         return [10, 10, len(self.channels)]
+
     def compact_state_shape(self):
-        return [10,10,1]
+        return [10, 10, 1]
+
+    def compact_state(self):
+        compact_state = self.state()[:, :, 0] | self.state()[:, :, 1] | self.state()[:, :, 2] | self.state()[:, :, 3]
+        compact_state = np.expand_dims(compact_state, axis=2)
+        return compact_state
+
     # Reset to start state for new episode
     def reset(self):
 

@@ -10,6 +10,8 @@ try:
     from matplotlib import pyplot as plt
     from matplotlib import colors
     import seaborn as sns
+    import matplotlib as mpl
+    mpl.use('TkAgg')
 except:
     import logging
     logging.warning("Cannot import matplotlib and/or seaborn."
