@@ -101,8 +101,8 @@ class Env:
             self.reset_after_goal()
 
         if self.goal_computer == 21 or self.goal_player == 21:
-            print(self.goal_computer)
-            print(self.goal_player)
+            # print(self.goal_computer)
+            # print(self.goal_player)
             self.terminal = True
 
         return r, self.terminal
