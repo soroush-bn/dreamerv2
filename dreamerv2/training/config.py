@@ -21,7 +21,7 @@ class MinAtarConfig():
     action_dtype: np.dtype = np.float32
 
     #training desc
-    train_steps: int = int(5e6)
+    train_steps: int = int(5e5)
     train_every: int = 50                                  #reduce this to potentially improve sample requirements
     collect_intervals: int = 5 
     batch_size: int = 50 
@@ -83,7 +83,7 @@ class MiniGridConfig():
     action_dtype: np.dtype = np.float32
 
     #training desc
-    train_steps: int = int(1e6)
+    train_steps: int = int(1e5)
     train_every: int = 5
     collect_intervals: int = 5
     batch_size: int = 50
