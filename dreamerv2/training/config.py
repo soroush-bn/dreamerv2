@@ -22,10 +22,10 @@ class MinAtarConfig():
 
     #training desc
     train_steps: int = int(5e5)
-    train_every: int = 50                                  #reduce this to potentially improve sample requirements
+    train_every: int = 25                                  #reduce this to potentially improve sample requirements
     collect_intervals: int = 5 
-    batch_size: int = 50 
-    seq_len: int = 50
+    batch_size: int = 25
+    seq_len: int = 10
     eval_episode: int = 4
     eval_render: bool = True
     save_every: int = int(1e5)

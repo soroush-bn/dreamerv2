@@ -97,6 +97,11 @@ class Evaluator(object):
                     next_obs, rew, done, _ = env.step(a)
                     if not np.array_equal(obs, convert_to_compact(next_obs)) :
                         not_changed = False
+                # frame_skip = 8
+                # for i in range(frame_skip):
+                #     np_action = action.squeeze(0).cpu().numpy()
+                #     a = np.array([np_action[0], 0, np_action[2], np_action[1], 0, 0])
+                #     next_obs, rew, done, _ = env.step(a)
 
                 if True:
                     if self.is_real_gym:
