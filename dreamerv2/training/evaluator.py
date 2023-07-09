@@ -6,8 +6,8 @@ from dreamerv2.models.dense import DenseModel
 from dreamerv2.models.pixel import ObsDecoder, ObsEncoder
 import gym
 
+from dreamerv2.training.converter import convert_to_compact, three_channel_converter
 from dreamerv2.utils import OneHotAction
-
 
 class Evaluator(object):
     '''
@@ -42,7 +42,6 @@ class Evaluator(object):
         embedding_size = config.embedding_size
         rssm_node_size = config.rssm_node_size
         modelstate_size = stoch_size + deter_size
-
         if config.pixel:
             self.ObsEncoder = ObsEncoder(obs_shape, embedding_size, config.obs_encoder).to(self.device).eval()
             self.ObsDecoder = ObsDecoder(obs_shape, modelstate_size, config.obs_decoder).to(self.device).eval()
@@ -66,7 +65,7 @@ class Evaluator(object):
         eval_episode = self.config.eval_episode
         eval_scores = []
         if self.is_real_gym:
-            env = gym.make("Pong-v0", render_mode='rgb_array')
+            env = gym.make("Pong-v0", render_mode='human')
             env = OneHotAction(env)
         for e in range(eval_episode):
             obs, score = env.reset(), 0
@@ -74,6 +73,7 @@ class Evaluator(object):
                 obs = convert_to_compact(obs)
             elif self.is_real_gym:
                 obs = three_channel_converter(obs)
+
             done = False
             prev_rssmstate = self.RSSM._init_rssm_state(1)
             prev_action = torch.zeros(1, self.action_size).to(self.device)
@@ -85,19 +85,29 @@ class Evaluator(object):
                     action, _ = self.ActionModel(model_state)
                     prev_rssmstate = posterior_rssm_state
                     prev_action = action
-                    # if (action.squeeze(0).cpu().numpy() == [0,0,1]).all() == False :
-                    # print("sssss")
+                    # if (action.squeeze(0).cpu().numpy() == [0,1,0]).all() == False :
+                        # print(action.squeeze(0).cpu().numpy())
                     # pass
 
                     # print("action to perform " + str(action.squeeze(0).cpu().numpy()))
-                next_obs, rew, done, _ = env.step(action.squeeze(0).cpu().numpy())
-                if False:
-                    env.render()
+                not_changed = True
+                while not_changed:
+                    np_action =action.squeeze(0).cpu().numpy()
+                    a = np.array([np_action[0],0,np_action[2],np_action[1],0,0])
+                    next_obs, rew, done, _ = env.step(a)
+                    if not np.array_equal(obs, convert_to_compact(next_obs)) :
+                        not_changed = False
+
+                if True:
+                    if self.is_real_gym:
+                        env.render(mode="rgb_array")
+                    else:
+                        env.render()
                 score += rew
                 if self.is_real_gym and self.is_compact:
-                    obs = convert_to_compact(obs)
+                    obs = convert_to_compact(next_obs)
                 elif self.is_real_gym:
-                    obs = three_channel_converter(obs)
+                    obs = three_channel_converter(next_obs)
                 else:
                     obs = next_obs
             eval_scores.append(score)
@@ -106,61 +116,3 @@ class Evaluator(object):
         return np.mean(eval_scores)
 
 
-
-# todo fix this by importing
-def three_channel_converter(obs):
-    channeled = np.zeros((3, 10, 10))
-    compact = convert_to_compact(obs)
-    compact = compact / 255
-    channeled[0, :, 0] = compact[:, 1]
-    channeled[1, :, 9] = compact[:, 8]
-    channeled[2] = compact
-    channeled[2, :, 1] = 0
-    channeled[2, :, 8] = 0
-    return channeled
-
-
-def convert_to_compact(frame):
-    result = np.zeros((10, 10))
-    p_obs = preprocess_single(frame)
-    bw_obs = make_bw_frame(p_obs)
-    converted_obs = conv2dpong(bw_obs)
-    result[:, 0] = converted_obs[:, 1]
-
-    result[:, 9] = converted_obs[:, 8]
-
-    return converted_obs
-
-
-def make_bw_frame(p_obs):
-    p_obs = p_obs.astype(int)
-    ball_index = np.where(p_obs == 158)
-    pads_index_right = np.where(p_obs == 61)
-    pads_index_left = np.where(p_obs == 45)
-    bw_obs = np.zeros(p_obs.shape)
-    bw_obs[ball_index] = 255
-    bw_obs[pads_index_right] = 255
-    bw_obs[pads_index_left] = 255
-    return bw_obs
-
-
-def conv2dpong(input):
-    conv = np.zeros((10, 10))
-    i = 0
-    j = 0
-    # for c in range(100):
-    for i in range(10):
-        for j in range(10):
-            conv[i, j] = input[i * 8:(i + 1) * 8, j * 8:(j + 1) * 8].sum()
-
-    conv[np.where(conv > 0)] = 255
-    return conv
-
-
-# plt.imshow(conv)
-
-
-def preprocess_single(image, bkg_color=np.array([144, 72, 17])):
-    # print('image[34:-16:2,::2].shape: ', image[34:-16:2,::2].shape)
-    img = np.mean(image[34:-16:2, ::2] - bkg_color, axis=-1)
-    return img

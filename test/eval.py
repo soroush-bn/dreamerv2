@@ -76,11 +76,11 @@ def main(args):
     evaluator = Evaluator(config, device,compact,real_gym)
     best_score = 0
 
-    for f in sorted(os.listdir(model_dir)):
-        eval_score = evaluator.eval_saved_agent(env, os.path.join(model_dir, f))
-        if eval_score > best_score:
-            print('..saving model number')
-            best_score = eval_score
+    # for f in sorted(os.listdir(model_dir)):
+    eval_score = evaluator.eval_saved_agent(env, os.path.join(model_dir, "models_400000.pth"))
+    if eval_score > best_score:
+        print('..saving model number')
+        best_score = eval_score
 
     print('best mean evaluation score amongst stored models is : ', best_score)
 
@@ -90,11 +90,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--env", default="pong", type=str, help='mini atari env name')
     parser.add_argument('--eval_episode', type=int, default=5, help='number of episodes to eval')
-    parser.add_argument("--id", type=str, default='0', help='Experiment ID')
+    parser.add_argument("--id", type=str, default='nt-compact-newrewarding-r1', help='Experiment ID')
     parser.add_argument("--eval_render", default=0, type=int, help='to render while evaluation')
     parser.add_argument("--pomdp", default=0, type=int, help='partial observation flag')
-    parser.add_argument("--gym", type=int, default=0, help="run real gym env or minatar")
-    parser.add_argument("--compact", type=int, default=0, help="run compact or channeled")
+    parser.add_argument("--gym", type=int, default=1, help="run real gym env or minatar")
+    parser.add_argument("--compact", type=int, default=1, help="run compact or channeled")
     parser.add_argument('--device', default='cuda', help='CUDA or CPU')
     args = parser.parse_args()
     main(args)
