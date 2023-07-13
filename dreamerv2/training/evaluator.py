@@ -6,7 +6,7 @@ from dreamerv2.models.dense import DenseModel
 from dreamerv2.models.pixel import ObsDecoder, ObsEncoder
 import gym
 
-from dreamerv2.training.converter import convert_to_compact, three_channel_converter
+from dreamerv2.training.converter import Converter
 from dreamerv2.utils import OneHotAction
 
 class Evaluator(object):
@@ -63,6 +63,7 @@ class Evaluator(object):
     def eval_saved_agent(self, env, model_path):
         self.load_model(self.config, model_path)
         eval_episode = self.config.eval_episode
+        converter = Converter((0,9),(0,0),(4,4))
         eval_scores = []
         if self.is_real_gym:
             env = gym.make("Pong-v0", render_mode='human')
@@ -70,9 +71,9 @@ class Evaluator(object):
         for e in range(eval_episode):
             obs, score = env.reset(), 0
             if self.is_real_gym and self.is_compact:
-                obs = convert_to_compact(obs)
+                obs = converter.convert_to_compact(obs)
             elif self.is_real_gym:
-                obs = three_channel_converter(obs)
+                obs = converter.three_channel_converter(obs)
 
             done = False
             prev_rssmstate = self.RSSM._init_rssm_state(1)
@@ -95,7 +96,7 @@ class Evaluator(object):
                     np_action =action.squeeze(0).cpu().numpy()
                     a = np.array([np_action[0],0,np_action[2],np_action[1],0,0])
                     next_obs, rew, done, _ = env.step(a)
-                    if not np.array_equal(obs, convert_to_compact(next_obs)) :
+                    if not np.array_equal(obs, converter.convert_to_compact(next_obs)) :
                         not_changed = False
                 # frame_skip = 8
                 # for i in range(frame_skip):
@@ -110,9 +111,9 @@ class Evaluator(object):
                         env.render()
                 score += rew
                 if self.is_real_gym and self.is_compact:
-                    obs = convert_to_compact(next_obs)
+                    obs = converter.convert_to_compact(next_obs)
                 elif self.is_real_gym:
-                    obs = three_channel_converter(next_obs)
+                    obs = converter.three_channel_concverter(next_obs)
                 else:
                     obs = next_obs
             eval_scores.append(score)
