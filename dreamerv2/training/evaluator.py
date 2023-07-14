@@ -9,6 +9,7 @@ import gym
 from dreamerv2.training.converter import Converter
 from dreamerv2.utils import OneHotAction
 
+
 class Evaluator(object):
     '''
     used this only for minigrid envs
@@ -63,7 +64,7 @@ class Evaluator(object):
     def eval_saved_agent(self, env, model_path):
         self.load_model(self.config, model_path)
         eval_episode = self.config.eval_episode
-        converter = Converter((0,9),(0,0),(4,4))
+        converter = Converter((0, 9), (0, 0), (4, 4))
         eval_scores = []
         if self.is_real_gym:
             env = gym.make("Pong-v0", render_mode='human')
@@ -87,17 +88,20 @@ class Evaluator(object):
                     prev_rssmstate = posterior_rssm_state
                     prev_action = action
                     # if (action.squeeze(0).cpu().numpy() == [0,1,0]).all() == False :
-                        # print(action.squeeze(0).cpu().numpy())
+                    # print(action.squeeze(0).cpu().numpy())
                     # pass
 
                     # print("action to perform " + str(action.squeeze(0).cpu().numpy()))
-                not_changed = True
-                while not_changed:
-                    np_action =action.squeeze(0).cpu().numpy()
-                    a = np.array([np_action[0],0,np_action[2],np_action[1],0,0])
-                    next_obs, rew, done, _ = env.step(a)
-                    if not np.array_equal(obs, converter.convert_to_compact(next_obs)) :
-                        not_changed = False
+                if self.is_real_gym:
+                    not_changed = True
+                    while not_changed:
+                        np_action = action.squeeze(0).cpu().numpy()
+                        a = np.array([np_action[0], 0, np_action[2], np_action[1], 0, 0])
+                        next_obs, rew, done, _ = env.step(a)
+                        if not np.array_equal(obs, converter.convert_to_compact(next_obs)):
+                            not_changed = False
+                else:
+                    next_obs, rew, done, _ = env.step(action.squeeze(0).cpu().numpy())
                 # frame_skip = 8
                 # for i in range(frame_skip):
                 #     np_action = action.squeeze(0).cpu().numpy()
@@ -120,5 +124,3 @@ class Evaluator(object):
         print('average evaluation score for model at ' + model_path + ' = ' + str(np.mean(eval_scores)))
         env.close()
         return np.mean(eval_scores)
-
-
