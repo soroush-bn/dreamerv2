@@ -12,7 +12,7 @@ class MinAtarConfig():
     env : str                                           
     obs_shape: Tuple                                            
     action_size: int
-    pixel: bool = True
+    pixel: bool = False
     action_repeat: int = 1
     
     #buffer desc
@@ -22,10 +22,10 @@ class MinAtarConfig():
 
     #training desc
     train_steps: int = int(5e5)
-    train_every: int = 25                                  #reduce this to potentially improve sample requirements
+    train_every: int = 50                                  #reduce this to potentially improve sample requirements
     collect_intervals: int = 5 
-    batch_size: int = 25
-    seq_len: int = 10
+    batch_size: int = 50
+    seq_len: int = 25
     eval_episode: int = 4
     eval_render: bool = True
     save_every: int = int(1e5)
@@ -34,9 +34,9 @@ class MinAtarConfig():
     gif_dir: int = 'results'
     
     #latent space desc
-    rssm_type: str = 'discrete'
-    embedding_size: int = 200
-    rssm_node_size: int = 200
+    rssm_type: str = 'continuous'
+    embedding_size: int = 100
+    rssm_node_size: int = 100
     rssm_info: Dict = field(default_factory=lambda:{'deter_size':200, 'stoch_size':20, 'class_size':20, 'category_size':20, 'min_std':0.1})
     
     #objective desc

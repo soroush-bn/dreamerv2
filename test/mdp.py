@@ -32,10 +32,8 @@ def main(args):
         device = torch.device('cpu')
     print('using :', device)
 
-    if compact:
-        env = OneHotAction(GymMinAtarCompact(env_name))
-    else:
-        env = OneHotAction(GymMinAtar(env_name))
+    env = gym.make("Pong-ram-v0")
+    env = OneHotAction(env)
     obs_shape = env.observation_space.shape
     action_size = env.action_space.shape[0]
     obs_dtype = bool
@@ -125,12 +123,12 @@ if __name__ == "__main__":
     """there are tonnes of HPs, if you want to do an ablation over any particular one, please add if here"""
     parser = argparse.ArgumentParser()
     parser.add_argument("--env",default='pong', type=str, help='mini atari env name')
-    parser.add_argument("--id", type=str, default='0', help='Experiment ID')
+    parser.add_argument("--id", type=str, default='ram', help='Experiment ID')
     parser.add_argument('--seed', type=int, default=123, help='Random seed')
     parser.add_argument('--device', default='cuda', help='CUDA or CPU')
     parser.add_argument('--batch_size', type=int, default=50, help='Batch size')
     parser.add_argument('--seq_len', type=int, default=50, help='Sequence Length (chunk length)')
     parser.add_argument("--gym", type=int, default=0, help="run real gym env or minatar")
-    parser.add_argument("--compact", type=int, default=1, help="run compact or channeled")
+    parser.add_argument("--compact", type=int, default=0, help="run compact or channeled")
     args = parser.parse_args()
     main(args)
