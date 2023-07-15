@@ -5,7 +5,8 @@ from dreamerv2.models.rssm import RSSM
 from dreamerv2.models.dense import DenseModel
 from dreamerv2.models.pixel import ObsDecoder, ObsEncoder
 import gym
-
+import matplotlib.pyplot as plt
+from PIL import Image
 from dreamerv2.training.converter import Converter
 from dreamerv2.utils import OneHotAction
 
@@ -27,6 +28,7 @@ class Evaluator(object):
         self.action_size = config.action_size
         self.is_compact = is_compact
         self.is_real_gym = is_real_gym
+        self.timestep = 0
 
     def load_model(self, config, model_path):
         saved_dict = torch.load(model_path)
@@ -43,6 +45,7 @@ class Evaluator(object):
         embedding_size = config.embedding_size
         rssm_node_size = config.rssm_node_size
         modelstate_size = stoch_size + deter_size
+
         if config.pixel:
             self.ObsEncoder = ObsEncoder(obs_shape, embedding_size, config.obs_encoder).to(self.device).eval()
             self.ObsDecoder = ObsDecoder(obs_shape, modelstate_size, config.obs_decoder).to(self.device).eval()
@@ -80,6 +83,7 @@ class Evaluator(object):
             prev_rssmstate = self.RSSM._init_rssm_state(1)
             prev_action = torch.zeros(1, self.action_size).to(self.device)
             while not done:
+                self.timestep += 1
                 with torch.no_grad():
                     embed = self.ObsEncoder(torch.tensor(obs, dtype=torch.float32).unsqueeze(0).to(self.device))
                     _, posterior_rssm_state = self.RSSM.rssm_observe(embed, prev_action, not done, prev_rssmstate)
@@ -87,6 +91,7 @@ class Evaluator(object):
                     action, _ = self.ActionModel(model_state)
                     prev_rssmstate = posterior_rssm_state
                     prev_action = action
+
                     # if (action.squeeze(0).cpu().numpy() == [0,1,0]).all() == False :
                     # print(action.squeeze(0).cpu().numpy())
                     # pass
@@ -94,7 +99,7 @@ class Evaluator(object):
                     # print("action to perform " + str(action.squeeze(0).cpu().numpy()))
                 if self.is_real_gym:
                     not_changed = True
-                    while not_changed:
+                    while not_changed or not done:
                         np_action = action.squeeze(0).cpu().numpy()
                         a = np.array([np_action[0], 0, np_action[2], np_action[1], 0, 0])
                         next_obs, rew, done, _ = env.step(a)
@@ -102,6 +107,8 @@ class Evaluator(object):
                             not_changed = False
                 else:
                     next_obs, rew, done, _ = env.step(action.squeeze(0).cpu().numpy())
+                self.get_imagined_obs(horizon=5, posterior_rssm_state=posterior_rssm_state, obs=next_obs)
+
                 # frame_skip = 8
                 # for i in range(frame_skip):
                 #     np_action = action.squeeze(0).cpu().numpy()
@@ -124,3 +131,26 @@ class Evaluator(object):
         print('average evaluation score for model at ' + model_path + ' = ' + str(np.mean(eval_scores)))
         env.close()
         return np.mean(eval_scores)
+
+    def get_imagined_obs(self, horizon, posterior_rssm_state, obs):
+        next_rssm_states, imag_log_probs, action_entropy = self.RSSM.rollout_imagination(horizon,
+                                                                                         self.ActionModel,
+                                                                                         posterior_rssm_state)
+
+        obs = Image.fromarray(obs)
+        if obs.mode != 'RGB':
+            obs = obs.convert('RGB')
+        # obs = obs.resize((80,80))
+        name = "E:\\projects\\dreamerv2-minatar\\dreamerv2\\training\\imaginations_real\\" + str(self.timestep) + ".jpeg"
+        obs.save(name)
+        _, x = self.ObsDecoder.forward(torch.cat((next_rssm_states.deter, next_rssm_states.stoch), dim=-1))
+        for i in range(horizon):
+            img = x[i].squeeze(0).cpu().detach().numpy()
+            img = Image.fromarray(img*255)
+            if img.mode != 'RGB':
+                img= img.convert('RGB')
+            img = img.resize((80, 80))
+
+            name = "E:\\projects\\dreamerv2-minatar\\dreamerv2\\training\\imaginations_real\\" + str(
+                self.timestep) + "_" + str(i) +".jpeg"
+            img.save(name)
