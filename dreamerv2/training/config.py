@@ -16,7 +16,7 @@ class MinAtarConfig():
     action_repeat: int = 4
     
     #buffer desc
-    capacity: int = int(1e6)
+    capacity: int = int(1e5)
     obs_dtype: np.dtype = np.uint8
     action_dtype: np.dtype = np.float32
 
