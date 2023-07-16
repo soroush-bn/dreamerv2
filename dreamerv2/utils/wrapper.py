@@ -1,6 +1,50 @@
-import minatar
 import gym
 import numpy as np
+from gym.spaces import Box
+
+import minatar
+
+
+class DeepMindWrapperPong(gym.Wrapper):
+    def __init__(self, env):
+        self.env = env
+        self.observation_space = Box(
+            low=0, high=255, shape=(1,80, 80), dtype=np.uint8
+        )
+
+    def reset(self):
+        obs = self.env.reset()
+        pre_obs = self.pre(obs)
+        expanded = np.expand_dims(pre_obs,axis= 0 )
+        return expanded
+
+    def step(self, action):
+        obs, rew, done, info = self.env.step(action)
+        pre_obs = self.pre(obs)
+        expanded = np.expand_dims(pre_obs,axis= 0 )
+
+        return expanded, rew, done, info
+
+    def preprocess_single(self, image, bkg_color=np.array([144, 72, 17])):
+        # print('image[34:-16:2,::2].shape: ', image[34:-16:2,::2].shape)
+        img = np.mean(image[34:-16:2, ::2] - bkg_color, axis=-1)
+        return img
+
+    def pre(self, obs):
+        p_obs = self.preprocess_single(obs)
+        bw_obs = self.make_bw_frame(p_obs)
+        return bw_obs
+
+    def make_bw_frame(self, p_obs):
+        p_obs = p_obs.astype(int)
+        ball_index = np.where(p_obs == 158)
+        pads_index_right = np.where(p_obs == 61)
+        pads_index_left = np.where(p_obs == 45)
+        bw_obs = np.zeros(p_obs.shape)
+        bw_obs[ball_index] = 255
+        bw_obs[pads_index_right] = 255
+        bw_obs[pads_index_left] = 255
+        return bw_obs
 
 
 class GymMinAtarCompact(gym.Env):
