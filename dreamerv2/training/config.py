@@ -34,7 +34,7 @@ class MinAtarConfig():
     gif_dir: int = 'results'
     
     #latent space desc
-    rssm_type: str = 'discrete'
+    rssm_type: str = 'continuous'
     embedding_size: int = 600
     rssm_node_size: int = 600
     rssm_info: Dict = field(default_factory=lambda:{'deter_size':600, 'stoch_size':32, 'class_size':32, 'category_size':32, 'min_std':0.1})
@@ -96,7 +96,7 @@ class MiniGridConfig():
     gif_dir: int = 'results'
 
     #latent space desc
-    rssm_type: str = 'discrete'
+    rssm_type: str = 'continuous'
     embedding_size: int = 100
     rssm_node_size: int = 100
     rssm_info: Dict = field(default_factory=lambda:{'deter_size':100, 'stoch_size':256, 'class_size':16, 'category_size':16, 'min_std':0.1})
