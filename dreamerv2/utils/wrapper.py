@@ -9,19 +9,19 @@ class DeepMindWrapperPong(gym.Wrapper):
     def __init__(self, env):
         self.env = env
         self.observation_space = Box(
-            low=0, high=255, shape=(1,80, 80), dtype=np.uint8
+            low=0, high=255, shape=(1, 80, 80), dtype=np.uint8
         )
 
     def reset(self):
         obs = self.env.reset()
         pre_obs = self.pre(obs)
-        expanded = np.expand_dims(pre_obs,axis= 0 )
+        expanded = np.expand_dims(pre_obs, axis=0)
         return expanded
 
     def step(self, action):
         obs, rew, done, info = self.env.step(action)
         pre_obs = self.pre(obs)
-        expanded = np.expand_dims(pre_obs,axis= 0 )
+        expanded = np.expand_dims(pre_obs, axis=0)
 
         return expanded, rew, done, info
 

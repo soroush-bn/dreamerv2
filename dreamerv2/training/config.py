@@ -12,16 +12,16 @@ class MinAtarConfig():
     env : str                                           
     obs_shape: Tuple                                            
     action_size: int
-    pixel: bool = True
-    action_repeat: int = 4
+    pixel: bool = False
+    action_repeat: int = 1
     
     #buffer desc
-    capacity: int = int(1e5)
+    capacity: int = int(1e6)
     obs_dtype: np.dtype = np.uint8
     action_dtype: np.dtype = np.float32
 
     #training desc
-    train_steps: int = int(5e5)
+    train_steps: int = int(5e6)
     train_every: int = 50                                #reduce this to potentially improve sample requirements
     collect_intervals: int = 5 
     batch_size: int = 50

@@ -69,15 +69,15 @@ class Evaluator(object):
         eval_episode = self.config.eval_episode
         converter = Converter((0, 9), (0, 0), (4, 4))
         eval_scores = []
-        if self.is_real_gym:
-            env = gym.make("Pong-v0", render_mode='human')
-            env = OneHotAction(env)
+        # if self.is_real_gym:
+        #     env = gym.make("Pong-v0", render_mode='human')
+        #     env = OneHotAction(env)
         for e in range(eval_episode):
             obs, score = env.reset(), 0
-            if self.is_real_gym and self.is_compact:
-                obs = converter.convert_to_compact(obs)
-            elif self.is_real_gym:
-                obs = converter.three_channel_converter(obs)
+            # if self.is_real_gym and self.is_compact:
+            #     obs = converter.convert_to_compact(obs)
+            # elif self.is_real_gym:
+            #     obs = converter.three_channel_converter(obs)
 
             done = False
             prev_rssmstate = self.RSSM._init_rssm_state(1)
@@ -97,17 +97,20 @@ class Evaluator(object):
                     # pass
 
                     # print("action to perform " + str(action.squeeze(0).cpu().numpy()))
-                if self.is_real_gym:
-                    not_changed = True
-                    while not_changed or not done:
-                        np_action = action.squeeze(0).cpu().numpy()
-                        a = np.array([np_action[0], 0, np_action[2], np_action[1], 0, 0])
-                        next_obs, rew, done, _ = env.step(a)
-                        if not np.array_equal(obs, converter.convert_to_compact(next_obs)):
-                            not_changed = False
-                else:
-                    next_obs, rew, done, _ = env.step(action.squeeze(0).cpu().numpy())
-                self.get_imagined_obs(horizon=5, posterior_rssm_state=posterior_rssm_state, obs=next_obs)
+                # if self.is_real_gym:
+                #     not_changed = True
+                #     while not_changed or not done:
+                #         np_action = action.squeeze(0).cpu().numpy()
+                #         a = np.array([np_action[0], 0, np_action[2], np_action[1], 0, 0])
+                #         next_obs, rew, done, _ = env.step(a)
+                #         if not np.array_equal(obs, converter.convert_to_compact(next_obs)):
+                #             not_changed = False
+                # else:
+                #     next_obs, rew, done, _ = env.step(action.squeeze(0).cpu().numpy())
+
+                next_obs, rew, done, _ = env.step(action.squeeze(0).cpu().numpy())
+
+                # self.get_imagined_obs(horizon=5, posterior_rssm_state=posterior_rssm_state, obs=next_obs)
 
                 # frame_skip = 8
                 # for i in range(frame_skip):
@@ -115,18 +118,18 @@ class Evaluator(object):
                 #     a = np.array([np_action[0], 0, np_action[2], np_action[1], 0, 0])
                 #     next_obs, rew, done, _ = env.step(a)
 
-                if True:
+                if False:
                     if self.is_real_gym:
                         env.render(mode="rgb_array")
                     else:
                         env.render()
                 score += rew
-                if self.is_real_gym and self.is_compact:
-                    obs = converter.convert_to_compact(next_obs)
-                elif self.is_real_gym:
-                    obs = converter.three_channel_concverter(next_obs)
-                else:
-                    obs = next_obs
+                # if self.is_real_gym and self.is_compact:
+                #     obs = converter.convert_to_compact(next_obs)
+                # elif self.is_real_gym:
+                #     obs = converter.three_channel_concverter(next_obs)
+                # else:
+                obs = next_obs
             eval_scores.append(score)
         print('average evaluation score for model at ' + model_path + ' = ' + str(np.mean(eval_scores)))
         env.close()

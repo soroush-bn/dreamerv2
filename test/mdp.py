@@ -12,6 +12,7 @@ from dreamerv2.utils.wrapper import OneHotAction, DeepMindWrapperPong
 from dreamerv2.training.config import MinAtarConfig
 from dreamerv2.training.trainer import Trainer
 from dreamerv2.training.evaluator import Evaluator
+from dreamerv2.training.physic import PhysicWrapper
 
 
 def main(args):
@@ -38,7 +39,9 @@ def main(args):
     #     env = OneHotAction(GymMinAtarCompact(env_name))
     # else:
     #     env = OneHotAction(GymMinAtar(env_name))
-    env = OneHotAction(DeepMindWrapperPong(gym.make("Pong-v0")))
+    # env = OneHotAction(DeepMindWrapperPong(gym.make("Pong-v0")))
+    env = gym.make("Pong-v0")
+    env = PhysicWrapper(env)
     obs_shape = env.observation_space.shape
     action_size = env.action_space.shape[0]
     obs_dtype = bool
@@ -133,7 +136,7 @@ if __name__ == "__main__":
     parser.add_argument('--device', default='cuda', help='CUDA or CPU')
     parser.add_argument('--batch_size', type=int, default=50, help='Batch size')
     parser.add_argument('--seq_len', type=int, default=50, help='Sequence Length (chunk length)')
-    parser.add_argument("--gym", type=int, default=0, help="run real gym env or minatar")
+    parser.add_argument("--gym", type=int, default=1, help="run real gym env or minatar")
     parser.add_argument("--compact", type=int, default=1, help="run compact or channeled")
     args = parser.parse_args()
     main(args)
