@@ -7,13 +7,9 @@ class PhysicWrapper(gym.Wrapper):
     def __init__(self, env):
         super(PhysicWrapper, self).__init__(env)
         self.env.observation_space = Box(
-            low=-80, high=80, shape=(1,10), dtype=np.uint8
+            low=-80, high=80, shape=(1, 10), dtype=np.uint8
         )
         self.state = np.zeros((10))
-
-    @property
-    def action_space(self):
-        return self.env.action_space
 
     @property
     def observation_space(self):
@@ -83,7 +79,7 @@ class PhysicWrapper(gym.Wrapper):
                 res = bw_obs[i * 8:(8 + i * 8), j * 8:(8 + j * 8)] * mask
                 if res.sum() == 2 * 255:
                     if j != previous_position[1]:
-                        return int(i*8), int(j*8)
+                        return int(i * 8), int(j * 8)
         return previous_position
 
     def find_paddle_right(self, bw_obs, previous_position: tuple):

@@ -41,7 +41,7 @@ def main(args):
     #     env = OneHotAction(GymMinAtar(env_name))
     # env = OneHotAction(DeepMindWrapperPong(gym.make("Pong-v0")))
     env = gym.make("Pong-v0")
-    env = PhysicWrapper(env)
+    env = OneHotAction(PhysicWrapper(env))
     obs_shape = env.observation_space.shape
     action_size = env.action_space.shape[0]
     obs_dtype = bool
