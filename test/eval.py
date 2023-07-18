@@ -2,6 +2,7 @@ import argparse
 import os
 import sys
 
+import gym
 import numpy as np
 import torch
 
@@ -10,7 +11,7 @@ from dreamerv2.utils.wrapper import GymMinAtar,GymMinAtarCompact, OneHotAction, 
     asterixPOMDP, freewayPOMDP
 from dreamerv2.training.config import MinAtarConfig
 from dreamerv2.training.evaluator import Evaluator
-
+from dreamerv2.training.physic import PhysicWrapper
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 pomdp_wrappers = {
@@ -31,16 +32,14 @@ def main(args):
         exp_id = args.id + '_pomdp'
         PomdpWrapper = pomdp_wrappers[env_name]
         if compact:
-            env = PomdpWrapper(OneHotAction(GymMinAtarCompact(env_name)))
+            env = PomdpWrapper(OneHotAction(PhysicWrapper(env_name)))
         else:
-            env = PomdpWrapper(OneHotAction(GymMinAtar(env_name)))
+            env = PomdpWrapper(OneHotAction(PhysicWrapper(env_name)))
         print('using partial state info')
     else:
         exp_id = args.id
-        if compact:
-            env = OneHotAction(GymMinAtarCompact(env_name))
-        else :
-            env = OneHotAction(GymMinAtar(env_name))
+        env = gym.make("Pong-v0",render_mode= "human")
+        env = OneHotAction(PhysicWrapper(env))
         print('using complete state info')
 
     if args.eval_episode == 1:
@@ -76,11 +75,11 @@ def main(args):
     evaluator = Evaluator(config, device,compact,real_gym)
     best_score = 0
 
-    # for f in sorted(os.listdir(model_dir)):
-    eval_score = evaluator.eval_saved_agent(env, os.path.join(model_dir, "models_400000.pth"))
-    if eval_score > best_score:
-        print('..saving model number')
-        best_score = eval_score
+    for f in sorted(os.listdir(model_dir)):
+        eval_score = evaluator.eval_saved_agent(env, os.path.join(model_dir, f))
+        if eval_score > best_score:
+            print('..saving model number')
+            best_score = eval_score
 
     print('best mean evaluation score amongst stored models is : ', best_score)
 
@@ -90,7 +89,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--env", default="pong", type=str, help='mini atari env name')
     parser.add_argument('--eval_episode', type=int, default=5, help='number of episodes to eval')
-    parser.add_argument("--id", type=str, default='nt-compact-newrewarding-r1', help='Experiment ID')
+    parser.add_argument("--id", type=str, default='physic', help='Experiment ID')
     parser.add_argument("--eval_render", default=0, type=int, help='to render while evaluation')
     parser.add_argument("--pomdp", default=0, type=int, help='partial observation flag')
     parser.add_argument("--gym", type=int, default=1, help="run real gym env or minatar")

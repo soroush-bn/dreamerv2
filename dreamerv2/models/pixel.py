@@ -31,6 +31,15 @@ class ObsEncoder(nn.Module):
             self.fc_1 = nn.Linear(self.embed_size, embedding_size)
 
     def forward(self, obs):
+        """
+               Encodes an observation.
+
+               Args:
+                   obs: The observation to encode.
+
+               Returns:
+                   The encoded vector.
+               """
         batch_shape = obs.shape[:-3]
         img_shape = obs.shape[-3:]
         embed = self.convolutions(obs.reshape(-1, *img_shape))
@@ -40,6 +49,12 @@ class ObsEncoder(nn.Module):
 
     @property
     def embed_size(self):
+        """
+               Returns the size of the encoded vector.
+
+               Returns:
+                   The size of the encoded vector.
+               """
         conv1_shape = conv_out_shape(self.shape[1:], 0, self.k, 1)
         conv2_shape = conv_out_shape(conv1_shape, 0, self.k, 1)
         conv3_shape = conv_out_shape(conv2_shape, 0, self.k, 1)
@@ -47,6 +62,14 @@ class ObsEncoder(nn.Module):
         return embed_size
 
 class ObsDecoder(nn.Module):
+    """
+       Decodes an encoded vector into an observation.
+
+       Args:
+           output_shape: The shape of the observation.
+           embed_size: The size of the encoded vector.
+           info: A dictionary of additional information, such as the activation function and kernel size.
+       """
     def __init__(self, output_shape, embed_size, info):
         """
         :param output_shape: tuple containing shape of output obs

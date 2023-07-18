@@ -4,14 +4,14 @@ from dreamerv2.utils.rssm import RSSMUtils, RSSMContState, RSSMDiscState
 
 class RSSM(nn.Module, RSSMUtils):
     def __init__(
-        self,
-        action_size,
-        rssm_node_size,
-        embedding_size,
-        device,
-        rssm_type,
-        info,
-        act_fn=nn.ELU,  
+            self,
+            action_size,
+            rssm_node_size,
+            embedding_size,
+            device,
+            rssm_type,
+            info,
+            act_fn=nn.ELU,
     ):
         nn.Module.__init__(self)
         RSSMUtils.__init__(self, rssm_type=rssm_type, info=info)
@@ -24,7 +24,7 @@ class RSSM(nn.Module, RSSMUtils):
         self.fc_embed_state_action = self._build_embed_state_action()
         self.fc_prior = self._build_temporal_prior()
         self.fc_posterior = self._build_temporal_posterior()
-    
+
     def _build_embed_state_action(self):
         """
         model is supposed to take in previous stochastic state and previous action 
@@ -33,7 +33,7 @@ class RSSM(nn.Module, RSSMUtils):
         fc_embed_state_action = [nn.Linear(self.stoch_size + self.action_size, self.deter_size)]
         fc_embed_state_action += [self.act_fn()]
         return nn.Sequential(*fc_embed_state_action)
-    
+
     def _build_temporal_prior(self):
         """
         model is supposed to take in latest deterministic state 
@@ -44,7 +44,7 @@ class RSSM(nn.Module, RSSMUtils):
         if self.rssm_type == 'discrete':
             temporal_prior += [nn.Linear(self.node_size, self.stoch_size)]
         elif self.rssm_type == 'continuous':
-             temporal_prior += [nn.Linear(self.node_size, 2 * self.stoch_size)]
+            temporal_prior += [nn.Linear(self.node_size, 2 * self.stoch_size)]
         return nn.Sequential(*temporal_prior)
 
     def _build_temporal_posterior(self):
@@ -59,24 +59,42 @@ class RSSM(nn.Module, RSSMUtils):
         elif self.rssm_type == 'continuous':
             temporal_posterior += [nn.Linear(self.node_size, 2 * self.stoch_size)]
         return nn.Sequential(*temporal_posterior)
-    
+
     def rssm_imagine(self, prev_action, prev_rssm_state, nonterms=True):
-        state_action_embed = self.fc_embed_state_action(torch.cat([prev_rssm_state.stoch*nonterms, prev_action],dim=-1))
-        deter_state = self.rnn(state_action_embed, prev_rssm_state.deter*nonterms)
+        """
+
+        This method imagines a future state from the current state and action. It takes as input the previous action,
+        the previous RSSM state, and a flag indicating whether the previous action is nonterminal.
+        :param prev_action:
+        :param prev_rssm_state:
+        :param nonterms:
+        :return:
+        """
+        state_action_embed = self.fc_embed_state_action(
+            torch.cat([prev_rssm_state.stoch * nonterms, prev_action], dim=-1))
+        deter_state = self.rnn(state_action_embed, prev_rssm_state.deter * nonterms)
         if self.rssm_type == 'discrete':
             prior_logit = self.fc_prior(deter_state)
-            stats = {'logit':prior_logit}
+            stats = {'logit': prior_logit}
             prior_stoch_state = self.get_stoch_state(stats)
             prior_rssm_state = RSSMDiscState(prior_logit, prior_stoch_state, deter_state)
 
         elif self.rssm_type == 'continuous':
             prior_mean, prior_std = torch.chunk(self.fc_prior(deter_state), 2, dim=-1)
-            stats = {'mean':prior_mean, 'std':prior_std}
+            stats = {'mean': prior_mean, 'std': prior_std}
             prior_stoch_state, std = self.get_stoch_state(stats)
             prior_rssm_state = RSSMContState(prior_mean, std, prior_stoch_state, deter_state)
         return prior_rssm_state
 
-    def rollout_imagination(self, horizon:int, actor:nn.Module, prev_rssm_state):
+    def rollout_imagination(self, horizon: int, actor: nn.Module, prev_rssm_state):
+        """
+        This method imagines a future state from the current state and action. It takes as input the previous action,
+        the previous RSSM state, and a flag indicating whether the previous action is nonterminal.
+        :param horizon:
+        :param actor:
+        :param prev_rssm_state:
+        :return:
+        """
         rssm_state = prev_rssm_state
         next_rssm_states = []
         action_entropy = []
@@ -94,32 +112,54 @@ class RSSM(nn.Module, RSSMUtils):
         return next_rssm_states, imag_log_probs, action_entropy
 
     def rssm_observe(self, obs_embed, prev_action, prev_nonterm, prev_rssm_state):
+        """
+        This method observes a new state and updates the RSSM state. It takes as input the new observation,
+        the previous action, the previous nonterminal, and the previous RSSM state.
+
+        :param obs_embed:
+        :param prev_action:
+        :param prev_nonterm:
+        :param prev_rssm_state:
+        :return:
+        """
         prior_rssm_state = self.rssm_imagine(prev_action, prev_rssm_state, prev_nonterm)
         deter_state = prior_rssm_state.deter
         x = torch.cat([deter_state, obs_embed], dim=-1)
         if self.rssm_type == 'discrete':
             posterior_logit = self.fc_posterior(x)
-            stats = {'logit':posterior_logit}
+            stats = {'logit': posterior_logit}
             posterior_stoch_state = self.get_stoch_state(stats)
             posterior_rssm_state = RSSMDiscState(posterior_logit, posterior_stoch_state, deter_state)
-        
+
         elif self.rssm_type == 'continuous':
             posterior_mean, posterior_std = torch.chunk(self.fc_posterior(x), 2, dim=-1)
-            stats = {'mean':posterior_mean, 'std':posterior_std}
+            stats = {'mean': posterior_mean, 'std': posterior_std}
             posterior_stoch_state, std = self.get_stoch_state(stats)
             posterior_rssm_state = RSSMContState(posterior_mean, std, posterior_stoch_state, deter_state)
         return prior_rssm_state, posterior_rssm_state
 
-    def rollout_observation(self, seq_len:int, obs_embed: torch.Tensor, action: torch.Tensor, nonterms: torch.Tensor, prev_rssm_state):
+    def rollout_observation(self, seq_len: int, obs_embed: torch.Tensor, action: torch.Tensor, nonterms: torch.Tensor,
+                            prev_rssm_state):
+        """
+        This method rollouts a sequence of future states and RSSM states from the current state, action, and observation.
+        It takes as input the sequence length, the observation embeddings, the actions, the nonterminals, and the previous RSSM state.
+
+        :param seq_len:
+        :param obs_embed:
+        :param action:
+        :param nonterms:
+        :param prev_rssm_state:
+        :return:
+        """
         priors = []
         posteriors = []
         for t in range(seq_len):
-            prev_action = action[t]*nonterms[t]
-            prior_rssm_state, posterior_rssm_state = self.rssm_observe(obs_embed[t], prev_action, nonterms[t], prev_rssm_state)
+            prev_action = action[t] * nonterms[t]
+            prior_rssm_state, posterior_rssm_state = self.rssm_observe(obs_embed[t], prev_action, nonterms[t],
+                                                                       prev_rssm_state)
             priors.append(prior_rssm_state)
             posteriors.append(posterior_rssm_state)
             prev_rssm_state = posterior_rssm_state
         prior = self.rssm_stack_states(priors, dim=0)
         post = self.rssm_stack_states(posteriors, dim=0)
         return prior, post
-        
