@@ -1,6 +1,6 @@
 import gym
 import numpy as np
-from gym.spaces import Discrete, Box
+from gym.spaces import Box
 
 
 class PhysicWrapper(gym.Wrapper):
@@ -17,7 +17,8 @@ class PhysicWrapper(gym.Wrapper):
         return self.env.observation_space
 
     def reset(self, **kwargs):
-        self.env.reset()
+        obs = self.env.reset()
+        self.previous_obs = obs
         return self.state
 
     def render(self, mode="human", **kwargs):
@@ -27,11 +28,12 @@ class PhysicWrapper(gym.Wrapper):
         return super().close()
 
     def step(self, action):
-        obs1, rew1, done1, info1 = self.env.step(action)
+        # obs1, rew1, done1, info1 = self.env.step(action)
         obs2, rew2, done2, info2 = self.env.step(action)
 
-        pr_pos1, pl_pos1, ball_pos1 = self.find_positions(obs1)
+        pr_pos1, pl_pos1, ball_pos1 = self.find_positions(self.previous_obs)  # this can be done only one
         pr_pos2, pl_pos2, ball_pos2 = self.find_positions(obs2)
+        self.previous_obs = obs2
         x_pl = pl_pos2[0]
         y_pl = pl_pos2[1]
         dx_pl = pl_pos2[0] - pl_pos1[0]
@@ -46,7 +48,7 @@ class PhysicWrapper(gym.Wrapper):
 
         self.state = np.array([x_pl, y_pl, dx_pl, x_pr, y_pr, dx_pr, x_ball, y_ball, dx_ball, dy_ball])
 
-        return self.state, rew1 + rew2, done1 or done2, info2
+        return self.state, rew2, done2, info2
 
     def find_positions(self, obs):
         p_obs = self.preprocess_single(obs)

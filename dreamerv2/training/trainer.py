@@ -52,7 +52,7 @@ class Trainer(object):
 
     def update_buffer(self, env, percentage=0.01):
         s, done = env.reset(), False
-        l = int(self.buffer.capacity * percentage)
+        l = int(self.seed_steps * percentage)
         prev_rssmstate = self.RSSM._init_rssm_state(1)
         prev_action = torch.zeros(1, self.action_size).to(self.device)
         for i in range(l):
