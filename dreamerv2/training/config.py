@@ -21,11 +21,11 @@ class MinAtarConfig():
     action_dtype: np.dtype = np.float32
 
     #training desc
-    train_steps: int = int(5e6)
+    train_steps: int = int(5e7)
     train_every: int = 50                                #reduce this to potentially improve sample requirements
     collect_intervals: int = 5 
-    batch_size: int = 50
-    seq_len: int = 25
+    batch_size: int = 100
+    seq_len: int = 5
     eval_episode: int = 4
     eval_render: bool = True
     save_every: int = int(1e5)
@@ -35,9 +35,9 @@ class MinAtarConfig():
     
     #latent space desc
     rssm_type: str = 'continuous'
-    embedding_size: int = 600
-    rssm_node_size: int = 600
-    rssm_info: Dict = field(default_factory=lambda:{'deter_size':600, 'stoch_size':32, 'class_size':32, 'category_size':32, 'min_std':0.1})
+    embedding_size: int = 20
+    rssm_node_size: int = 20
+    rssm_info: Dict = field(default_factory=lambda:{'deter_size':20, 'stoch_size':16, 'class_size':16, 'category_size':16, 'min_std':0.1})
     
     #objective desc
     grad_clip: float = 100.0

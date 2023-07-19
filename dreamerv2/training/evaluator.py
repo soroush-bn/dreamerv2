@@ -157,3 +157,27 @@ class Evaluator(object):
             name = "E:\\projects\\dreamerv2-minatar\\dreamerv2\\training\\imaginations_real\\" + str(
                 self.timestep) + "_" + str(i) +".jpeg"
             img.save(name)
+
+    def get_imagined_obs(self, horizon, posterior_rssm_state, obs):
+        next_rssm_states, imag_log_probs, action_entropy = self.RSSM.rollout_imagination(horizon,
+                                                                                         self.ActionModel,
+                                                                                         posterior_rssm_state)
+
+        obs = Image.fromarray(obs)
+        if obs.mode != 'RGB':
+            obs = obs.convert('RGB')
+        # obs = obs.resize((80,80))
+        name = "E:\\projects\\dreamerv2-minatar\\dreamerv2\\training\\imaginations_real\\" + str(
+            self.timestep) + ".jpeg"
+        obs.save(name)
+        _, x = self.ObsDecoder.forward(torch.cat((next_rssm_states.deter, next_rssm_states.stoch), dim=-1))
+        for i in range(horizon):
+            img = x[i].squeeze(0).cpu().detach().numpy()
+            img = Image.fromarray(img * 255)
+            if img.mode != 'RGB':
+                img = img.convert('RGB')
+            img = img.resize((80, 80))
+
+            name = "E:\\projects\\dreamerv2-minatar\\dreamerv2\\training\\imaginations_real\\" + str(
+                self.timestep) + "_" + str(i) + ".jpeg"
+            img.save(name)
