@@ -50,7 +50,7 @@ class MinAtarConfig():
     use_slow_target: float = True
     slow_target_update: int = 100
     slow_target_fraction: float = 1.00
-
+    buffer_update : int  = 10000
     #actor critic
     actor: Dict = field(default_factory=lambda:{'layers':3, 'node_size':100, 'dist':'one_hot', 'min_std':1e-4, 'init_std':5, 'mean_scale':5, 'activation':nn.ELU})
     critic: Dict = field(default_factory=lambda:{'layers':3, 'node_size':100, 'dist': 'normal', 'activation':nn.ELU})
@@ -60,8 +60,8 @@ class MinAtarConfig():
     actor_entropy_scale: float = 1e-3
 
     #learnt world-models desc
-    obs_encoder: Dict = field(default_factory=lambda:{'layers':3, 'node_size':100, 'dist': None, 'activation':nn.ELU, 'kernel':3, 'depth':16})
-    obs_decoder: Dict = field(default_factory=lambda:{'layers':3, 'node_size':100, 'dist':'normal', 'activation':nn.ELU, 'kernel':3, 'depth':16})
+    obs_encoder: Dict = field(default_factory=lambda:{'layers':2, 'node_size':16, 'dist': None, 'activation':nn.ELU, 'kernel':3, 'depth':16})
+    obs_decoder: Dict = field(default_factory=lambda:{'layers':2, 'node_size':16, 'dist':'normal', 'activation':nn.ELU, 'kernel':3, 'depth':16})
     reward: Dict = field(default_factory=lambda:{'layers':3, 'node_size':100, 'dist':'normal', 'activation':nn.ELU})
     discount: Dict = field(default_factory=lambda:{'layers':3, 'node_size':100, 'dist':'binary', 'activation':nn.ELU, 'use':True})
 

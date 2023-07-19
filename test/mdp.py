@@ -85,6 +85,8 @@ def main(args):
                 trainer.update_target()
             if iter % trainer.config.save_every == 0:
                 trainer.save_model(iter)
+            if iter % trainer.config.buffer_update == 0 :
+                trainer.update_buffer(env)
             with torch.no_grad():
                 embed = trainer.ObsEncoder(torch.tensor(obs, dtype=torch.float32).unsqueeze(0).to(trainer.device))
                 _, posterior_rssm_state = trainer.RSSM.rssm_observe(embed, prev_action, not done, prev_rssmstate)
