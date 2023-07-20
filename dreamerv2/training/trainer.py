@@ -47,8 +47,30 @@ class Trainer(object):
                 s, done  = env.reset(), False 
             else:
                 self.buffer.add(s,a,r,done)
-                s = ns    
+                s = ns
 
+    def update_buffer(self, env, percentage=0.01):
+        s, done = env.reset(), False
+        l = int(self.seed_steps * percentage)
+        prev_rssmstate = self.RSSM._init_rssm_state(1)
+        prev_action = torch.zeros(1, self.action_size).to(self.device)
+        for i in range(l):
+            with torch.no_grad():
+                embed = self.ObsEncoder(torch.tensor(s, dtype=torch.float32).unsqueeze(0).to(self.device))
+                _, posterior_rssm_state = self.RSSM.rssm_observe(embed, prev_action, not done, prev_rssmstate)
+                model_state = self.RSSM.get_model_state(posterior_rssm_state)
+                action, _ = self.ActionModel(model_state)
+                prev_rssmstate = posterior_rssm_state
+                prev_action = action
+            a = action.squeeze(0).cpu().numpy()
+            ns, r, done, _ = env.step(a)
+            if done:
+                self.buffer.add(s, a, r, done)
+                s, done = env.reset(), False
+            else:
+                self.buffer.add(s, a, r, done)
+                s = ns
+        print("buffer updated")
     def train_batch(self, train_metrics):
         """ 
         trains the world model and imagination actor and critic for collect_interval times using sequence-batch data from buffer

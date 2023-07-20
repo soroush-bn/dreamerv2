@@ -7,7 +7,7 @@ import gym
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from dreamerv2.utils.wrapper import GymMinAtar, OneHotAction,GymMinAtarCompact
+from dreamerv2.utils.wrapper import GymMinAtar, OneHotAction, GymMinAtarCompact, Usefulram
 from dreamerv2.training.config import MinAtarConfig
 from dreamerv2.training.trainer import Trainer
 from dreamerv2.training.evaluator import Evaluator
@@ -33,6 +33,7 @@ def main(args):
     print('using :', device)
 
     env = gym.make("Pong-ram-v0")
+    env = Usefulram(env)
     env = OneHotAction(env)
     obs_shape = env.observation_space.shape
     action_size = env.action_space.shape[0]
@@ -77,6 +78,8 @@ def main(args):
                 trainer.update_target()                
             if iter%trainer.config.save_every == 0:
                 trainer.save_model(iter)
+            if iter % trainer.config.buffer_update == 0 :
+                trainer.update_buffer(env)
             with torch.no_grad():
                 embed = trainer.ObsEncoder(torch.tensor(obs, dtype=torch.float32).unsqueeze(0).to(trainer.device))  
                 _, posterior_rssm_state = trainer.RSSM.rssm_observe(embed, prev_action, not done, prev_rssmstate)

@@ -207,3 +207,20 @@ class OneHotAction(gym.Wrapper):
         reference = np.zeros(actions, dtype=np.float32)
         reference[index] = 1.0
         return reference
+
+
+class Usefulram(gym.Wrapper):
+
+    def step(self, action):
+        obs, rew, done, info = self.env.step(action)
+        useful_indexes = [2, 4, 8, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 21,
+                          49, 50, 51, 54, 56, 60, 64, 67, 69, 71, 73, 121, 122]
+        obs = obs[useful_indexes]
+        return obs, rew, done, info
+
+    def reset(self, **kwargs):
+        obs = self.env.reset()
+        useful_indexes = [2, 4, 8, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 21,
+                          49, 50, 51, 54, 56, 60, 64, 67, 69, 71, 73, 121, 122]
+        obs = obs[useful_indexes]
+        return obs
