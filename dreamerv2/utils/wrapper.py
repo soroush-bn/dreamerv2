@@ -210,17 +210,20 @@ class OneHotAction(gym.Wrapper):
 
 
 class Usefulram(gym.Wrapper):
+    def __init__(self, env):
+        self.env = env
+        self.useful_indexes = [2, 4, 8, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 21,
+                               49, 50, 51, 54, 56, 60, 64, 67, 69, 71, 73, 121, 122]
+        self.observation_space = gym.spaces.Box(0, 255, np.shape(self.useful_indexes)
+                                                )
 
     def step(self, action):
         obs, rew, done, info = self.env.step(action)
-        useful_indexes = [2, 4, 8, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 21,
-                          49, 50, 51, 54, 56, 60, 64, 67, 69, 71, 73, 121, 122]
-        obs = obs[useful_indexes]
+
+        obs = obs[self.useful_indexes]
         return obs, rew, done, info
 
     def reset(self, **kwargs):
         obs = self.env.reset()
-        useful_indexes = [2, 4, 8, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 21,
-                          49, 50, 51, 54, 56, 60, 64, 67, 69, 71, 73, 121, 122]
-        obs = obs[useful_indexes]
+        obs = obs[self.useful_indexes]
         return obs
