@@ -36,10 +36,10 @@ class MinAtarConfig():
 
     # latent space desc
     rssm_type: str = 'continuous'
-    embedding_size: int = 20
-    rssm_node_size: int = 20
+    embedding_size: int = 10
+    rssm_node_size: int = 10
     rssm_info: Dict = field(
-        default_factory=lambda: {'deter_size': 20, 'stoch_size': 20, 'class_size': 20, 'category_size': 20,
+        default_factory=lambda: {'deter_size': 10, 'stoch_size': 10, 'class_size': 10, 'category_size': 10,
                                  'min_std': 0.1})
 
     # objective desc
@@ -61,7 +61,7 @@ class MinAtarConfig():
                                  'mean_scale': 5, 'activation': nn.ELU})
     critic: Dict = field(default_factory=lambda: {'layers': 3, 'node_size': 20, 'dist': 'normal', 'activation': nn.ELU})
     expl: Dict = field(
-        default_factory=lambda: {'train_noise': 0.3, 'eval_noise': 0.0, 'expl_min': 0.05, 'expl_decay': 7000.0,
+        default_factory=lambda: {'train_noise': 0.3, 'eval_noise': 0.0, 'expl_min': 0.1, 'expl_decay': 7000.0,
                                  'expl_type': 'epsilon_greedy'})
     actor_grad: str = 'reinforce'
     actor_grad_mix: int = 0.0
@@ -69,10 +69,10 @@ class MinAtarConfig():
 
     # learnt world-models desc
     obs_encoder: Dict = field(
-        default_factory=lambda: {'layers': 2, 'node_size': 20, 'dist': None, 'activation': nn.ELU, 'kernel': 3,
+        default_factory=lambda: {'layers': 2, 'node_size': 10, 'dist': None, 'activation': nn.ELU, 'kernel': 3,
                                  'depth': 16})
     obs_decoder: Dict = field(
-        default_factory=lambda: {'layers': 2, 'node_size': 20, 'dist': 'normal', 'activation': nn.ELU, 'kernel': 3,
+        default_factory=lambda: {'layers': 2, 'node_size': 10, 'dist': 'normal', 'activation': nn.ELU, 'kernel': 3,
                                  'depth': 16})
     reward: Dict = field(
         default_factory=lambda: {'layers': 3, 'node_size': 100, 'dist': 'normal', 'activation': nn.ELU})

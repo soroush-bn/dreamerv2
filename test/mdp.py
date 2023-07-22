@@ -7,7 +7,7 @@ import gym
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from dreamerv2.utils.wrapper import GymMinAtar, OneHotAction, GymMinAtarCompact, Usefulram
+from dreamerv2.utils.wrapper import GymMinAtar, OneHotAction, GymMinAtarCompact, Usefulram, AtariARIWrapper
 from dreamerv2.training.config import MinAtarConfig
 from dreamerv2.training.trainer import Trainer
 from dreamerv2.training.evaluator import Evaluator
@@ -33,7 +33,7 @@ def main(args):
     print('using :', device)
 
     env = gym.make("Pong-ram-v0")
-    env = Usefulram(env)
+    env = Usefulram(AtariARIWrapper(env))
     env = OneHotAction(env)
     obs_shape = env.observation_space.shape
     action_size = env.action_space.shape[0]
