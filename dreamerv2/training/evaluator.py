@@ -91,50 +91,28 @@ class Evaluator(object):
                     # print(action.squeeze(0).cpu().numpy())
                     # pass
                     # print("action to perform " + str(action.squeeze(0).cpu().numpy()))
-                # if self.is_real_gym:
-                #     not_changed = True
-                #     while not_changed:
-                #         np_action = action.squeeze(0).cpu().numpy()
-                #         a = np.array([np_action[0], 0, np_action[2], np_action[1], 0, 0])
-                #         next_obs, rew, done, _ = env.step(a)
-                #         if not np.array_equal(obs, converter.convert_to_compact(next_obs)):
-                #             not_changed = False
-                # else:
-                #     next_obs, rew, done, _ = env.step(action.squeeze(0).cpu().numpy())
-                next_obs, rew, done, _ = env.step(action.squeeze(0).cpu().numpy())
-                similarity = self.imagination_similarity(5,prev_rssmstate,next_obs)
-                # # frame_skip = 8
-                # for i in range(frame_skip):
-                #     np_action = action.squeeze(0).cpu().numpy()
-                #     a = np.array([np_action[0], 0, np_action[2], np_action[1], 0, 0])
-                #     next_obs, rew, done, _ = env.step(a)
 
-                if True:
+                next_obs, rew, done, _ = env.step(action.squeeze(0).cpu().numpy())
+                similarity = self.imagination_similarity(5, prev_rssmstate, next_obs)
+                if False:
                     if self.is_real_gym:
                         env.render(mode="rgb_array")
                     else:
                         env.render()
                 score += rew
-                # if self.is_real_gym and self.is_compact:
-                #     obs = converter.convert_to_compact(next_obs)
-                # elif self.is_real_gym:
-                #     obs = converter.three_channel_concverter(next_obs)
-                # else:
-                #     obs = next_obs
-                obs= next_obs
+                obs = next_obs
             eval_scores.append(score)
         print('average evaluation score for model at ' + model_path + ' = ' + str(np.mean(eval_scores)))
         env.close()
         return np.mean(eval_scores)
 
-
-    def imagination_similarity(self,horizon,prev_rssmstate,next_state):
+    def imagination_similarity(self, horizon, prev_rssmstate, next_state):
         next_rssm_states, imag_log_probs, action_entropy = self.RSSM.rollout_imagination(horizon, self.ActionModel,
                                                                                          prev_rssmstate)
 
-        next_imagined_states= self.ObsDecoder(torch.concat((next_rssm_states.deter,next_rssm_states.stoch),dim=-1))
+        next_imagined_states = self.ObsDecoder(torch.concat((next_rssm_states.deter, next_rssm_states.stoch), dim=-1))
 
         cos = torch.nn.CosineSimilarity(dim=0)
-        similarity= cos(torch.from_numpy(next_state),next_imagined_states.sample()[0].cpu().squeeze(0))
+        similarity = cos(torch.from_numpy(next_state), next_imagined_states.sample()[0].cpu().squeeze(0))
 
         return similarity

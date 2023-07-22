@@ -7,8 +7,9 @@ import numpy as np
 import torch
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from dreamerv2.utils.wrapper import GymMinAtar,GymMinAtarCompact, OneHotAction, breakoutPOMDP, space_invadersPOMDP, seaquestPOMDP, \
-    asterixPOMDP, freewayPOMDP
+from dreamerv2.utils.wrapper import GymMinAtar, GymMinAtarCompact, OneHotAction, breakoutPOMDP, space_invadersPOMDP, \
+    seaquestPOMDP, \
+    asterixPOMDP, freewayPOMDP, AtariARIWrapper, Usefulram
 from dreamerv2.training.config import MinAtarConfig
 from dreamerv2.training.evaluator import Evaluator
 
@@ -44,6 +45,7 @@ def main(args):
     #         env = OneHotAction(GymMinAtar(env_name))
     #     print('using complete state info')
     env = gym.make("Pong-ram-v0",render_mode = "human")
+    env = Usefulram(AtariARIWrapper(env))
     env = OneHotAction(env)
     if args.eval_episode == 1:
         eval_render = True
@@ -91,8 +93,8 @@ if __name__ == "__main__":
     """there are tonnes of HPs, if you want to do an ablation over any particular one, please add if here"""
     parser = argparse.ArgumentParser()
     parser.add_argument("--env", default="pong", type=str, help='mini atari env name')
-    parser.add_argument('--eval_episode', type=int, default=1, help='number of episodes to eval')
-    parser.add_argument("--id", type=str, default='ram', help='Experiment ID')
+    parser.add_argument('--eval_episode', type=int, default=5, help='number of episodes to eval')
+    parser.add_argument("--id", type=str, default='ram_8tayi', help='Experiment ID')
     parser.add_argument("--eval_render", default=0, type=int, help='to render while evaluation')
     parser.add_argument("--pomdp", default=0, type=int, help='partial observation flag')
     parser.add_argument("--gym", type=int, default=1, help="run real gym env or minatar")

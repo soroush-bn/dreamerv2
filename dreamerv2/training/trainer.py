@@ -34,7 +34,11 @@ class Trainer(object):
         self.actor_entropy_scale = config.actor_entropy_scale
         self.grad_clip_norm = config.grad_clip
 
+        result_dir = os.path.join('results', 'pong_ram_8tayi')
+        model_dir = os.path.join(result_dir, 'models')
         self._model_initialize(config)
+
+        self.load_save_dict(os.path.join(model_dir, "model_700000.pth"))
         self._optim_initialize(config)
 
     def collect_seed_episodes(self, env):
@@ -185,7 +189,6 @@ class Trainer(object):
         return actor_loss, value_loss, target_info
     # aya be in scenario loss ezasfe konim ????
     def representation_loss(self, obs, actions, rewards, nonterms):
-
         embed = self.ObsEncoder(obs)                                         #t to t+seq_len   
         prev_rssm_state = self.RSSM._init_rssm_state(self.batch_size)   
         prior, posterior = self.RSSM.rollout_observation(self.seq_len, embed, actions, nonterms, prev_rssm_state)
