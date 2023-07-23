@@ -44,7 +44,7 @@ def main(args):
     #     else :
     #         env = OneHotAction(GymMinAtar(env_name))
     #     print('using complete state info')
-    env = gym.make("Pong-ram-v0",render_mode = "human")
+    env = gym.make("Pong-ramDeterministic-v4",render_mode = "human")
     env = Usefulram(AtariARIWrapper(env))
     env = OneHotAction(env)
     if args.eval_episode == 1:

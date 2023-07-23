@@ -32,7 +32,7 @@ def main(args):
         device = torch.device('cpu')
     print('using :', device)
 
-    env = gym.make("Pong-ram-v0")
+    env = gym.make("Pong-ramDeterministic-v4")
     env = Usefulram(AtariARIWrapper(env))
     env = OneHotAction(env)
     obs_shape = env.observation_space.shape
