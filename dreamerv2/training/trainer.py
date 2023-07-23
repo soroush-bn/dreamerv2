@@ -34,11 +34,11 @@ class Trainer(object):
         self.actor_entropy_scale = config.actor_entropy_scale
         self.grad_clip_norm = config.grad_clip
 
-        result_dir = os.path.join('results', 'pong_ram_8tayi')
-        model_dir = os.path.join(result_dir, 'models')
         self._model_initialize(config)
-
-        self.load_save_dict(os.path.join(model_dir, "model_700000.pth"))
+        #
+        # result_dir = os.path.join('results', 'pong_ram_8tayi')
+        # model_dir = os.path.join(result_dir, 'models')
+        # self.load_save_dict(os.path.join(model_dir, "model_700000.pth"))
         self._optim_initialize(config)
 
     def collect_seed_episodes(self, env):

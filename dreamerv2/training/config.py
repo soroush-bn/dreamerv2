@@ -23,10 +23,10 @@ class MinAtarConfig():
 
     # training desc
     train_steps: int = int(5e7)
-    train_every: int = 50  # reduce this to potentially improve sample requirements
+    train_every: int = 25  # reduce this to potentially improve sample requirements
     collect_intervals: int = 5
     batch_size: int = 100
-    seq_len: int = 25
+    seq_len: int = 4
     eval_episode: int = 4
     eval_render: bool = True
     save_every: int = int(1e5)
@@ -36,17 +36,17 @@ class MinAtarConfig():
 
     # latent space desc
     rssm_type: str = 'continuous'
-    embedding_size: int = 10
-    rssm_node_size: int = 10
+    embedding_size: int = 8
+    rssm_node_size: int = 8
     rssm_info: Dict = field(
-        default_factory=lambda: {'deter_size': 10, 'stoch_size': 10, 'class_size': 10, 'category_size': 10,
+        default_factory=lambda: {'deter_size': 8, 'stoch_size': 8, 'class_size': 8, 'category_size': 8,
                                  'min_std': 0.1})
 
     # objective desc
     grad_clip: float = 100.0
     discount_: float = 0.99
     lambda_: float = 0.95
-    horizon: int = 10
+    horizon: int = 5
     lr: Dict = field(default_factory=lambda: {'model': 2e-4, 'actor': 4e-5, 'critic': 1e-4})
     loss_scale: Dict = field(default_factory=lambda: {'kl': 0.1, 'reward': 1.0, 'discount': 5.0})
     kl: Dict = field(default_factory=lambda: {'use_kl_balance': True, 'kl_balance_scale': 0.8, 'use_free_nats': False,
@@ -69,15 +69,15 @@ class MinAtarConfig():
 
     # learnt world-models desc
     obs_encoder: Dict = field(
-        default_factory=lambda: {'layers': 2, 'node_size': 10, 'dist': None, 'activation': nn.ELU, 'kernel': 3,
+        default_factory=lambda: {'layers': 1, 'node_size': 8, 'dist': None, 'activation': nn.ELU, 'kernel': 3,
                                  'depth': 16})
     obs_decoder: Dict = field(
-        default_factory=lambda: {'layers': 2, 'node_size': 10, 'dist': 'normal', 'activation': nn.ELU, 'kernel': 3,
+        default_factory=lambda: {'layers': 1, 'node_size': 8, 'dist': 'normal', 'activation': nn.ELU, 'kernel': 3,
                                  'depth': 16})
     reward: Dict = field(
-        default_factory=lambda: {'layers': 3, 'node_size': 100, 'dist': 'normal', 'activation': nn.ELU})
+        default_factory=lambda: {'layers': 2, 'node_size': 20, 'dist': 'normal', 'activation': nn.ELU})
     discount: Dict = field(
-        default_factory=lambda: {'layers': 3, 'node_size': 100, 'dist': 'binary', 'activation': nn.ELU, 'use': True})
+        default_factory=lambda: {'layers': 2, 'node_size': 20, 'dist': 'binary', 'activation': nn.ELU, 'use': True})
 
 
 @dataclass
