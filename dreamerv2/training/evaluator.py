@@ -70,7 +70,7 @@ class Evaluator(object):
         converter = Converter((0, 9), (0, 0), (4, 4))
         eval_scores = []
         if self.is_real_gym:
-            env = gym.make("Pong-v0", render_mode='human')
+            env = gym.make("PongDeterministic-v4", render_mode='human')
             env = OneHotAction(env)
         for e in range(eval_episode):
             obs, score = env.reset(), 0
@@ -97,18 +97,19 @@ class Evaluator(object):
                     # pass
 
                     # print("action to perform " + str(action.squeeze(0).cpu().numpy()))
-                if self.is_real_gym:
-                    not_changed = True
-                    while not_changed or not done:
-                        np_action = action.squeeze(0).cpu().numpy()
-                        a = np.array([np_action[0], 0, np_action[2], np_action[1], 0, 0])
-                        next_obs, rew, done, _ = env.step(a)
-                        if not np.array_equal(obs, converter.convert_to_compact(next_obs)):
-                            not_changed = False
-                else:
-                    next_obs, rew, done, _ = env.step(action.squeeze(0).cpu().numpy())
-                self.get_imagined_obs(horizon=5, posterior_rssm_state=posterior_rssm_state, obs=next_obs)
-
+                # if self.is_real_gym:
+                #     not_changed = True
+                #     while not_changed or not done:
+                #         np_action = action.squeeze(0).cpu().numpy()
+                #         a = np.array([np_action[0], 0, np_action[2], np_action[1], 0, 0])
+                #         next_obs, rew, done, _ = env.step(a)
+                #         if not np.array_equal(obs, converter.convert_to_compact(next_obs)):
+                #             not_changed = False
+                # else:
+                #     next_obs, rew, done, _ = env.step(action.squeeze(0).cpu().numpy())
+                # # self.get_imagined_obs(horizon=5, posterior_rssm_state=posterior_rssm_state, obs=next_obs)
+                next_obs, rew, done, _ = env.step(action.squeeze(0).cpu().numpy())
+                print(action.squeeze(0).cpu().numpy())
                 # frame_skip = 8
                 # for i in range(frame_skip):
                 #     np_action = action.squeeze(0).cpu().numpy()

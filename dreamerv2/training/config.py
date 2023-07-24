@@ -13,7 +13,7 @@ class MinAtarConfig():
     obs_shape: Tuple                                            
     action_size: int
     pixel: bool = True
-    action_repeat: int = 4
+    action_repeat: int = 1
     
     #buffer desc
     capacity: int = int(1e5)
@@ -35,9 +35,9 @@ class MinAtarConfig():
     
     #latent space desc
     rssm_type: str = 'discrete'
-    embedding_size: int = 600
-    rssm_node_size: int = 600
-    rssm_info: Dict = field(default_factory=lambda:{'deter_size':600, 'stoch_size':32, 'class_size':32, 'category_size':32, 'min_std':0.1})
+    embedding_size: int = 200
+    rssm_node_size: int = 200
+    rssm_info: Dict = field(default_factory=lambda:{'deter_size':200, 'stoch_size':20, 'class_size':20, 'category_size':20, 'min_std':0.1})
     
     #objective desc
     grad_clip: float = 100.0

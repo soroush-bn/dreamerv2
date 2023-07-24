@@ -76,11 +76,11 @@ def main(args):
     evaluator = Evaluator(config, device,compact,real_gym)
     best_score = 0
 
-    # for f in sorted(os.listdir(model_dir)):
-    eval_score = evaluator.eval_saved_agent(env, os.path.join(model_dir, "models_400000.pth"))
-    if eval_score > best_score:
-        print('..saving model number')
-        best_score = eval_score
+    for f in sorted(os.listdir(model_dir)):
+        eval_score = evaluator.eval_saved_agent(env, os.path.join(model_dir, f))
+        if eval_score > best_score:
+            print('..saving model number')
+            best_score = eval_score
 
     print('best mean evaluation score amongst stored models is : ', best_score)
 
