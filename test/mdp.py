@@ -38,7 +38,7 @@ def main(args):
     #     env = OneHotAction(GymMinAtarCompact(env_name))
     # else:
     #     env = OneHotAction(GymMinAtar(env_name))
-    env = OneHotAction(DeepMindWrapperPong(gym.make("Pong-v0")))
+    env = OneHotAction(DeepMindWrapperPong(gym.make("PongDeterministic-v4")))
     obs_shape = env.observation_space.shape
     action_size = env.action_space.shape[0]
     obs_dtype = bool
@@ -82,6 +82,9 @@ def main(args):
                 trainer.update_target()
             if iter % trainer.config.save_every == 0:
                 trainer.save_model(iter)
+            if iter % trainer.config.buffer_update == 0:
+                trainer.update_buffer(env)
+
             with torch.no_grad():
                 embed = trainer.ObsEncoder(torch.tensor(obs, dtype=torch.float32).unsqueeze(0).to(trainer.device))
                 _, posterior_rssm_state = trainer.RSSM.rssm_observe(embed, prev_action, not done, prev_rssmstate)

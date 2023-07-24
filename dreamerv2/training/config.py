@@ -50,6 +50,7 @@ class MinAtarConfig():
     use_slow_target: float = True
     slow_target_update: int = 100
     slow_target_fraction: float = 1.00
+    buffer_update: int = 10000
 
     #actor critic
     actor: Dict = field(default_factory=lambda:{'layers':3, 'node_size':100, 'dist':'one_hot', 'min_std':1e-4, 'init_std':5, 'mean_scale':5, 'activation':nn.ELU})
