@@ -41,7 +41,7 @@ class Trainer(object):
         s, done  = env.reset(), False 
         for i in range(self.seed_steps):
             a = env.action_space.sample()
-            ns, r, done, _ = env.step(a)
+            ns, r, done, _ = env.step(a,None)
             if done:
                 self.buffer.add(s,a,r,done)
                 s, done  = env.reset(), False 
