@@ -9,19 +9,19 @@ class DeepMindWrapperPong(gym.Wrapper):
     def __init__(self, env):
         self.env = env
         self.observation_space = Box(
-            low=0, high=255, shape=(1,80, 80), dtype=np.uint8
+            low=0, high=255, shape=(1, 80, 80), dtype=np.uint8
         )
 
     def reset(self):
         obs = self.env.reset()
         pre_obs = self.pre(obs)
-        expanded = np.expand_dims(pre_obs,axis= 0 )
+        expanded = np.expand_dims(pre_obs, axis=0)
         return expanded
 
     def step(self, action):
         obs, rew, done, info = self.env.step(action)
         pre_obs = self.pre(obs)
-        expanded = np.expand_dims(pre_obs,axis= 0 )
+        expanded = np.expand_dims(pre_obs, axis=0)
 
         return expanded, rew, done, info
 
@@ -63,11 +63,11 @@ class GymMinAtarCompact(gym.Env):
         self.env.reset()
         return self.env.compact_state().transpose(2, 0, 1)
 
-    def step(self, index,a_prime):
+    def step(self, index, a_prime):
         '''index is the action id, considering only the set of minimal actions'''
         action = self.minimal_actions[index]
         a_prime = self.minimal_actions[a_prime]
-        r, terminal = self.env.act(action,a_prime)
+        r, terminal = self.env.act(action, a_prime)
         self.game_over = terminal
         return self.env.compact_state().transpose(2, 0, 1), r, terminal, {}
 
@@ -229,11 +229,17 @@ class OneHotAction(gym.Wrapper):
         env.action_space.sample = self._sample_action
         super(OneHotAction, self).__init__(env)
 
-    def step(self, action):
+    def step(self, action, action_prime=None):
+
         index = np.argmax(action).astype(int)
         reference = np.zeros_like(action)
         reference[index] = 1
-        return self.env.step(index)
+        if action_prime is not None:
+            index_prime = np.argmax(action_prime).astype(int)
+            reference_prime = np.zeros_like(action_prime)
+            reference_prime[index_prime] = 1
+            return self.env.step(index, index_prime)
+        return self.env.step(index,None)
 
     def reset(self):
         return self.env.reset()
