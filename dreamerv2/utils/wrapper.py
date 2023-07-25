@@ -63,10 +63,11 @@ class GymMinAtarCompact(gym.Env):
         self.env.reset()
         return self.env.compact_state().transpose(2, 0, 1)
 
-    def step(self, index, a_prime):
+    def step(self, index, a_prime=None):
         '''index is the action id, considering only the set of minimal actions'''
         action = self.minimal_actions[index]
-        a_prime = self.minimal_actions[a_prime]
+        if a_prime is not None:
+            a_prime = self.minimal_actions[a_prime]
         r, terminal = self.env.act(action, a_prime)
         self.game_over = terminal
         return self.env.compact_state().transpose(2, 0, 1), r, terminal, {}
