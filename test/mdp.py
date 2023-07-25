@@ -72,6 +72,7 @@ def main(args):
         prev_rssmstate_prime = trainer.RSSM._init_rssm_state(1)
         prev_action = torch.zeros(1, trainer.action_size).to(trainer.device)
         prev_action_prime = torch.zeros(1, trainer.action_size).to(trainer.device)
+        action_prime = None
         episode_actor_ent = []
         scores = []
         best_mean_score = 0
@@ -106,7 +107,11 @@ def main(args):
                     action_prime, action_dist_prime = trainer.ActionModel_prime(model_state_prime)
                     action_prime = trainer.ActionModel_prime.add_exploration(action_prime, iter).detach()
                     action_ent_prime = torch.mean(action_dist_prime.entropy()).item()
-            next_obs, rew, done, _ = env.step(action.squeeze(0).cpu().numpy(),action_prime.squeeze(0).cpu().numpy())
+            if action_prime is not None:
+                next_obs, rew, done, _ = env.step(action.squeeze(0).cpu().numpy(),action_prime.squeeze(0).cpu().numpy())
+            else:
+                next_obs, rew, done, _ = env.step(action.squeeze(0).cpu().numpy(),action_prime)
+
             score += rew
 
             if done:
