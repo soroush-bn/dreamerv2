@@ -101,7 +101,7 @@ def main(args):
             if iter > config.random_policy_untill or current_average>5 :
                 if current_average>5 : print("adopting learned policy " )
                 with torch.no_grad():
-                    embed_prime = trainer.ObsEncoder_prime(torch.tensor(np.flip(obs), dtype=torch.float32).unsqueeze(0).to(trainer.device))
+                    embed_prime = trainer.ObsEncoder_prime(torch.tensor(np.flip(obs).copy(), dtype=torch.float32).unsqueeze(0).to(trainer.device))
                     _, posterior_rssm_state_prime = trainer.RSSM_prime.rssm_observe(embed_prime, prev_action_prime, not done, prev_rssmstate_prime)
                     model_state_prime = trainer.RSSM_prime.get_model_state(posterior_rssm_state_prime)
                     action_prime, action_dist_prime = trainer.ActionModel_prime(model_state_prime)
