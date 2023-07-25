@@ -44,11 +44,11 @@ class Environment:
             self.env.random = self.random
 
     # Wrapper for env.act
-    def act(self, a):
+    def act(self, a,a_prime):
         if self.random.rand() < self.sticky_action_prob:
             a = self.last_action
         self.last_action = a
-        return self.env.act(a)
+        return self.env.act(a,a_prime)
 
     # Wrapper for env.state
     def state(self):

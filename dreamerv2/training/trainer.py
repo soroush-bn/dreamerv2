@@ -296,7 +296,16 @@ class Trainer(object):
         self.ActionModel.load_state_dict(saved_dict["ActionModel"])
         self.ValueModel.load_state_dict(saved_dict["ValueModel"])
         self.DiscountModel.load_state_dict(saved_dict['DiscountModel'])
-            
+
+    def load_save_dict_prime(self, saved_dict):
+        self.RSSM_prime.load_state_dict(saved_dict["RSSM"])
+        self.ObsEncoder_prime.load_state_dict(saved_dict["ObsEncoder"])
+        self.ObsDecoder_prime.load_state_dict(saved_dict["ObsDecoder"])
+        self.RewardDecoder_prime.load_state_dict(saved_dict["RewardDecoder"])
+        self.ActionModel_prime.load_state_dict(saved_dict["ActionModel"])
+        self.ValueModel_prime.load_state_dict(saved_dict["ValueModel"])
+        self.DiscountModel_prime.load_state_dict(saved_dict['DiscountModel'])
+
     def _model_initialize(self, config):
         obs_shape = config.obs_shape
         action_size = config.action_size
@@ -314,17 +323,24 @@ class Trainer(object):
     
         self.buffer = TransitionBuffer(config.capacity, obs_shape, action_size, config.seq_len, config.batch_size, config.obs_dtype, config.action_dtype)
         self.RSSM = RSSM(action_size, rssm_node_size, embedding_size, self.device, config.rssm_type, config.rssm_info).to(self.device)
+        self.RSSM_prime = RSSM(action_size, rssm_node_size, embedding_size, self.device, config.rssm_type, config.rssm_info).to(self.device)
         self.ActionModel = DiscreteActionModel(action_size, deter_size, stoch_size, embedding_size, config.actor, config.expl).to(self.device)
+        self.ActionModel_prime = DiscreteActionModel(action_size, deter_size, stoch_size, embedding_size, config.actor, config.expl).to(self.device)
         self.RewardDecoder = DenseModel((1,), modelstate_size, config.reward).to(self.device)
+        self.RewardDecoder_prime = DenseModel((1,), modelstate_size, config.reward).to(self.device)
         self.ValueModel = DenseModel((1,), modelstate_size, config.critic).to(self.device)
+        self.ValueModel_prime = DenseModel((1,), modelstate_size, config.critic).to(self.device)
         self.TargetValueModel = DenseModel((1,), modelstate_size, config.critic).to(self.device)
         self.TargetValueModel.load_state_dict(self.ValueModel.state_dict())
         
         if config.discount['use']:
             self.DiscountModel = DenseModel((1,), modelstate_size, config.discount).to(self.device)
+            self.DiscountModel_prime = DenseModel((1,), modelstate_size, config.discount).to(self.device)
         if config.pixel:
             self.ObsEncoder = ObsEncoder(obs_shape, embedding_size, config.obs_encoder).to(self.device)
+            self.ObsEncoder_prime = ObsEncoder(obs_shape, embedding_size, config.obs_encoder).to(self.device)
             self.ObsDecoder = ObsDecoder(obs_shape, modelstate_size, config.obs_decoder).to(self.device)
+            self.ObsDecoder_prime = ObsDecoder(obs_shape, modelstate_size, config.obs_decoder).to(self.device)
         else:
             self.ObsEncoder = DenseModel((embedding_size,), int(np.prod(obs_shape)), config.obs_encoder).to(self.device)
             self.ObsDecoder = DenseModel(obs_shape, modelstate_size, config.obs_decoder).to(self.device)

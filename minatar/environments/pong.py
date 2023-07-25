@@ -24,7 +24,7 @@ class Env:
         self.reset()
 
     # Update environment according to agent action
-    def act(self, a):
+    def act(self, a,a_prime=None):
         r = 0
         if (self.terminal):
             return r, self.terminal
@@ -40,14 +40,27 @@ class Env:
             pass
 
         # computer movement
-        if (self.paddle_computer_x == 8 and self.paddle_computer_dx == 1) or (
-                self.paddle_computer_x == 1 and self.paddle_computer_dx == -1):
-            self.paddle_computer_dx *= -1
-        else:
-            p = random.random()
-            if p < 0.25:
+        if a_prime==None:
+            if (self.paddle_computer_x == 8 and self.paddle_computer_dx == 1) or (
+                    self.paddle_computer_x == 1 and self.paddle_computer_dx == -1):
                 self.paddle_computer_dx *= -1
-        self.paddle_computer_x += self.paddle_computer_dx
+            else:
+                p = random.random()
+                if p < 0.25:
+                    self.paddle_computer_dx *= -1
+            self.paddle_computer_x += self.paddle_computer_dx
+        else:
+            a_prime = self.action_map[a_prime]
+
+            # Resolve computer action
+            if (a_prime == 'r'):
+                self.paddle_computer_x = max(1, self.paddle_computer_x - 1)
+            elif (a_prime == 'l'):
+                self.paddle_computer_x = min(8, self.paddle_computer_x + 1)
+            elif (a_prime == 'n'):
+                pass
+
+
 
         # Update ball position
         # hardcoded todo need fix

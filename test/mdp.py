@@ -8,7 +8,7 @@ import torch
 import wandb
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from dreamerv2.utils.wrapper import OneHotAction, DeepMindWrapperPong
+from dreamerv2.utils.wrapper import OneHotAction, DeepMindWrapperPong, GymMinAtarCompact, GymMinAtar
 from dreamerv2.training.config import MinAtarConfig
 from dreamerv2.training.trainer import Trainer
 from dreamerv2.training.evaluator import Evaluator
@@ -34,11 +34,11 @@ def main(args):
         device = torch.device('cpu')
     print('using :', device)
 
-    # if compact:
-    #     env = OneHotAction(GymMinAtarCompact(env_name))
-    # else:
-    #     env = OneHotAction(GymMinAtar(env_name))
-    env = OneHotAction(DeepMindWrapperPong(gym.make("PongDeterministic-v4")))
+    if compact:
+        env = OneHotAction(GymMinAtarCompact(env_name))
+    else:
+        env = OneHotAction(GymMinAtar(env_name))
+    # env = OneHotAction(DeepMindWrapperPong(gym.make("PongDeterministic-v4")))
     obs_shape = env.observation_space.shape
     action_size = env.action_space.shape[0]
     obs_dtype = bool
@@ -69,7 +69,9 @@ def main(args):
         obs, score = env.reset(), 0
         done = False
         prev_rssmstate = trainer.RSSM._init_rssm_state(1)
+        prev_rssmstate_prime = trainer.RSSM._init_rssm_state(1)
         prev_action = torch.zeros(1, trainer.action_size).to(trainer.device)
+        prev_action_prime = torch.zeros(1, trainer.action_size).to(trainer.device)
         episode_actor_ent = []
         scores = []
         best_mean_score = 0
@@ -84,6 +86,8 @@ def main(args):
                 trainer.save_model(iter)
             if iter % trainer.config.buffer_update == 0:
                 trainer.update_buffer(env)
+            if iter% config.copy_model_every ==0 or current_average>5:
+                trainer.load_save_dict_prime(trainer.get_save_dict())
 
             with torch.no_grad():
                 embed = trainer.ObsEncoder(torch.tensor(obs, dtype=torch.float32).unsqueeze(0).to(trainer.device))
@@ -93,8 +97,16 @@ def main(args):
                 action = trainer.ActionModel.add_exploration(action, iter).detach()
                 action_ent = torch.mean(action_dist.entropy()).item()
                 episode_actor_ent.append(action_ent)
-
-            next_obs, rew, done, _ = env.step(action.squeeze(0).cpu().numpy())
+            if iter > config.random_policy_untill or current_average>5 :
+                if current_average>5 : print("adopting learned policy " )
+                with torch.no_grad():
+                    embed_prime = trainer.ObsEncoder_prime(torch.tensor(np.flip(obs), dtype=torch.float32).unsqueeze(0).to(trainer.device))
+                    _, posterior_rssm_state_prime = trainer.RSSM_prime.rssm_observe(embed_prime, prev_action_prime, not done, prev_rssmstate_prime)
+                    model_state_prime = trainer.RSSM_prime.get_model_state(posterior_rssm_state_prime)
+                    action_prime, action_dist_prime = trainer.ActionModel_prime(model_state_prime)
+                    action_prime = trainer.ActionModel_prime.add_exploration(action_prime, iter).detach()
+                    action_ent_prime = torch.mean(action_dist_prime.entropy()).item()
+            next_obs, rew, done, _ = env.step(action.squeeze(0).cpu().numpy(),action_prime.squeeze(0).cpu().numpy())
             score += rew
 
             if done:
@@ -131,7 +143,7 @@ if __name__ == "__main__":
     """there are tonnes of HPs, if you want to do an ablation over any particular one, please add if here"""
     parser = argparse.ArgumentParser()
     parser.add_argument("--env", default='pong', type=str, help='mini atari env name')
-    parser.add_argument("--id", type=str, default='realatari-nt', help='Experiment ID')
+    parser.add_argument("--id", type=str, default='two_action', help='Experiment ID')
     parser.add_argument('--seed', type=int, default=123, help='Random seed')
     parser.add_argument('--device', default='cuda', help='CUDA or CPU')
     parser.add_argument('--batch_size', type=int, default=50, help='Batch size')

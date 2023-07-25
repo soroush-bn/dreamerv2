@@ -51,6 +51,8 @@ class MinAtarConfig():
     slow_target_update: int = 100
     slow_target_fraction: float = 1.00
     buffer_update: int = 10000
+    random_policy_untill  = 100000
+    copy_model_every = 100000
 
     #actor critic
     actor: Dict = field(default_factory=lambda:{'layers':3, 'node_size':100, 'dist':'one_hot', 'min_std':1e-4, 'init_std':5, 'mean_scale':5, 'activation':nn.ELU})
@@ -87,8 +89,8 @@ class MiniGridConfig():
     train_steps: int = int(1e5)
     train_every: int = 5
     collect_intervals: int = 5
-    batch_size: int = 50
-    seq_len: int = 8
+    batch_size: int = 50 # Bozorg tarin adadi ke ja mishe batch size bozorg learning rate bozorg
+    seq_len: int = 5 #
     eval_episode: int = 5
     eval_render: bool = True
     save_every: int = int(5e4)
@@ -98,15 +100,15 @@ class MiniGridConfig():
 
     #latent space desc
     rssm_type: str = 'discrete'
-    embedding_size: int = 100
-    rssm_node_size: int = 100
+    embedding_size: int = 100 # arz 20 25 tool 3 ta 5
+    rssm_node_size: int = 100 # 5 ta 10 ta catagory
     rssm_info: Dict = field(default_factory=lambda:{'deter_size':100, 'stoch_size':256, 'class_size':16, 'category_size':16, 'min_std':0.1})
-
+    # sahme stoch kamtar bashe
     #objective desc
     grad_clip: float = 100.0
     discount_: float = 0.99
     lambda_: float = 0.95
-    horizon: int = 8
+    horizon: int =  5 # 3 ta 5
     lr: Dict = field(default_factory=lambda:{'model':2e-4, 'actor':4e-5, 'critic':1e-4})
     loss_scale: Dict = field(default_factory=lambda:{'kl':1, 'reward':1.0, 'discount':10.0})
     kl: Dict = field(default_factory=lambda:{'use_kl_balance':True, 'kl_balance_scale':0.8, 'use_free_nats':False, 'free_nats':0.0})
