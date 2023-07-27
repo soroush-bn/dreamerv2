@@ -87,7 +87,7 @@ def main(args):
                 trainer.save_model(iter)
             if iter % trainer.config.buffer_update == 0:
                 trainer.update_buffer(env)
-            if iter% config.copy_model_every ==0 or current_average>5:
+            if iter% config.copy_model_every ==0 or current_average>3:
                 trainer.load_save_dict_prime(trainer.get_save_dict())
 
             with torch.no_grad():
@@ -98,7 +98,7 @@ def main(args):
                 action = trainer.ActionModel.add_exploration(action, iter).detach()
                 action_ent = torch.mean(action_dist.entropy()).item()
                 episode_actor_ent.append(action_ent)
-            if iter > config.random_policy_untill or current_average>5 :
+            if iter > config.random_policy_untill or current_average>3 :
                 if iter%1000 == 0 : print("adopting learned policy " )
                 with torch.no_grad():
                     embed_prime = trainer.ObsEncoder_prime(torch.tensor(np.flip(obs).copy(), dtype=torch.float32).unsqueeze(0).to(trainer.device))
