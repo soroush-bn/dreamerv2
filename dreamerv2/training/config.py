@@ -24,7 +24,7 @@ class MinAtarConfig():
     train_steps: int = int(5e5)
     train_every: int = 50                                #reduce this to potentially improve sample requirements
     collect_intervals: int = 5 
-    batch_size: int = 200
+    batch_size: int = 50
     seq_len: int = 25
     eval_episode: int = 4
     eval_render: bool = True
@@ -44,15 +44,15 @@ class MinAtarConfig():
     discount_: float = 0.99
     lambda_: float = 0.95
     horizon: int = 5
-    lr: Dict = field(default_factory=lambda:{'model':4e-4, 'actor':8e-5, 'critic':4e-4})
+    lr: Dict = field(default_factory=lambda:{'model':2e-4, 'actor':4e-5, 'critic':2e-4})
     loss_scale: Dict = field(default_factory=lambda:{'kl':0.1, 'reward':1.0, 'discount':5.0})
     kl: Dict = field(default_factory=lambda:{'use_kl_balance':True, 'kl_balance_scale':0.8, 'use_free_nats':False, 'free_nats':0.0})
     use_slow_target: float = True
     slow_target_update: int = 100
     slow_target_fraction: float = 1.00
     buffer_update: int = 10000
-    random_policy_untill  = 100000
-    copy_model_every = 100000
+    random_policy_untill  = 50000
+    copy_model_every = 50000
 
     #actor critic
     actor: Dict = field(default_factory=lambda:{'layers':3, 'node_size':25, 'dist':'one_hot', 'min_std':1e-4, 'init_std':5, 'mean_scale':5, 'activation':nn.ELU})
