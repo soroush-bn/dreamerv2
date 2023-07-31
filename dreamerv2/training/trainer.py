@@ -36,7 +36,9 @@ class Trainer(object):
 
         self._model_initialize(config)
         self._optim_initialize(config)
-
+        saved_dict = torch.load(r"E:\projects\dreamerv2-minatar\test\results\pong_nt-compact-newrewarding-r1\models\models_400000.pth")
+        self.load_save_dict(saved_dict)
+        print("lock and load")
     def collect_seed_episodes(self, env):
         s, done  = env.reset(), False 
         for i in range(self.seed_steps):

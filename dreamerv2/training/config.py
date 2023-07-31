@@ -35,9 +35,9 @@ class MinAtarConfig():
     
     #latent space desc
     rssm_type: str = 'discrete'
-    embedding_size: int = 25
-    rssm_node_size: int = 25
-    rssm_info: Dict = field(default_factory=lambda:{'deter_size':25, 'stoch_size':10, 'class_size':10, 'category_size':10, 'min_std':0.1})
+    embedding_size: int = 200
+    rssm_node_size: int = 200
+    rssm_info: Dict = field(default_factory=lambda:{'deter_size':200, 'stoch_size':20, 'class_size':20, 'category_size':20, 'min_std':0.1})
     
     #objective desc
     grad_clip: float = 100.0
@@ -55,18 +55,18 @@ class MinAtarConfig():
     copy_model_every = 50000
 
     #actor critic
-    actor: Dict = field(default_factory=lambda:{'layers':3, 'node_size':25, 'dist':'one_hot', 'min_std':1e-4, 'init_std':5, 'mean_scale':5, 'activation':nn.ELU})
-    critic: Dict = field(default_factory=lambda:{'layers':3, 'node_size':25, 'dist': 'normal', 'activation':nn.ELU})
+    actor: Dict = field(default_factory=lambda:{'layers':3, 'node_size':100, 'dist':'one_hot', 'min_std':1e-4, 'init_std':5, 'mean_scale':5, 'activation':nn.ELU})
+    critic: Dict = field(default_factory=lambda:{'layers':3, 'node_size':100, 'dist': 'normal', 'activation':nn.ELU})
     expl: Dict = field(default_factory=lambda:{'train_noise':0.4, 'eval_noise':0.0, 'expl_min':0.05, 'expl_decay':7000.0, 'expl_type':'epsilon_greedy'})
     actor_grad: str ='reinforce'
     actor_grad_mix: int = 0.0
     actor_entropy_scale: float = 1e-3
 
     #learnt world-models desc
-    obs_encoder: Dict = field(default_factory=lambda:{'layers':3, 'node_size':25, 'dist': None, 'activation':nn.ELU, 'kernel':3, 'depth':16})
-    obs_decoder: Dict = field(default_factory=lambda:{'layers':3, 'node_size':25, 'dist':'normal', 'activation':nn.ELU, 'kernel':3, 'depth':16})
-    reward: Dict = field(default_factory=lambda:{'layers':3, 'node_size':25, 'dist':'normal', 'activation':nn.ELU})
-    discount: Dict = field(default_factory=lambda:{'layers':3, 'node_size':25, 'dist':'binary', 'activation':nn.ELU, 'use':True})
+    obs_encoder: Dict = field(default_factory=lambda:{'layers':3, 'node_size':100, 'dist': None, 'activation':nn.ELU, 'kernel':3, 'depth':16})
+    obs_decoder: Dict = field(default_factory=lambda:{'layers':3, 'node_size':100, 'dist':'normal', 'activation':nn.ELU, 'kernel':3, 'depth':16})
+    reward: Dict = field(default_factory=lambda:{'layers':3, 'node_size':100, 'dist':'normal', 'activation':nn.ELU})
+    discount: Dict = field(default_factory=lambda:{'layers':3, 'node_size':100, 'dist':'binary', 'activation':nn.ELU, 'use':True})
 
 
 @dataclass
@@ -89,8 +89,8 @@ class MiniGridConfig():
     train_steps: int = int(1e5)
     train_every: int = 5
     collect_intervals: int = 5
-    batch_size: int = 50 # Bozorg tarin adadi ke ja mishe batch size bozorg learning rate bozorg
-    seq_len: int = 5 #
+    batch_size: int = 50
+    seq_len: int = 8
     eval_episode: int = 5
     eval_render: bool = True
     save_every: int = int(5e4)

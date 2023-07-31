@@ -5,6 +5,14 @@ from gym.spaces import Box
 import minatar
 
 
+# import os
+# import sys
+# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+
+# from dreamerv2.training.converter import Converter
+
+
 class DeepMindWrapperPong(gym.Wrapper):
     def __init__(self, env):
         self.env = env
@@ -222,6 +230,36 @@ class TimeLimit(gym.Wrapper):
         return self.env.reset()
 
 
+class Converter10x10(gym.Wrapper):
+    def __init__(self, env, converter):
+        super(Converter10x10, self).__init__(env)
+        self.converter = converter
+        self.action_map = ['n', 'l', 'u', 'r', 'd', 'f']
+
+        self.minimal_actions = self.minimal_action_set()
+        self.action_space = gym.spaces.Discrete(len(self.minimal_actions))
+        # self.observation_space = gym.spaces.MultiBinary((1, 10, 10))
+
+    @property
+    def observation_space(self):
+        return gym.spaces.MultiBinary((1, 10, 10))
+
+    def step(self, action):
+        obs, rew, done, info = self.env.step(action)
+
+        obs = self.converter.convert_to_compact(obs)
+        return obs, rew, done, info
+
+    def reset(self, **kwargs):
+        obs = self.env.reset()
+        obs = self.converter.convert_to_compact(obs)
+        return obs
+
+    def minimal_action_set(self):
+        minimal_actions = ['n', 'l', 'r']
+        return [self.action_map.index(x) for x in minimal_actions]
+
+
 class OneHotAction(gym.Wrapper):
     def __init__(self, env):
         assert isinstance(env.action_space, gym.spaces.Discrete), "This wrapper only works with discrete action space"
@@ -231,7 +269,6 @@ class OneHotAction(gym.Wrapper):
         super(OneHotAction, self).__init__(env)
 
     def step(self, action, action_prime=None):
-
         index = np.argmax(action).astype(int)
         reference = np.zeros_like(action)
         reference[index] = 1
@@ -240,7 +277,7 @@ class OneHotAction(gym.Wrapper):
             reference_prime = np.zeros_like(action_prime)
             reference_prime[index_prime] = 1
             return self.env.step(index, index_prime)
-        return self.env.step(index,None)
+        return self.env.step(index)
 
     def reset(self):
         return self.env.reset()
