@@ -7,9 +7,9 @@ import numpy as np
 import torch
 import wandb
 
-from dreamerv2.training.converter import Converter
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from dreamerv2.training.converter import Converter
 from dreamerv2.utils.wrapper import OneHotAction, Converter10x10,DeepMindWrapperPong, GymMinAtarCompact, GymMinAtar
 from dreamerv2.training.config import MinAtarConfig
 from dreamerv2.training.trainer import Trainer
@@ -110,10 +110,11 @@ def main(args):
                     action_prime, action_dist_prime = trainer.ActionModel_prime(model_state_prime)
                     action_prime = trainer.ActionModel_prime.add_exploration(action_prime, iter).detach()
                     action_ent_prime = torch.mean(action_dist_prime.entropy()).item()
-            if action_prime is not None:
-                next_obs, rew, done, _ = env.step(action.squeeze(0).cpu().numpy(),action_prime.squeeze(0).cpu().numpy())
-            else:
-                next_obs, rew, done, _ = env.step(action.squeeze(0).cpu().numpy(),action_prime)
+            # if action_prime is not None:
+                # next_obs, rew, done, _ = env.step(action.squeeze(0).cpu().numpy(),action_prime.squeeze(0).cpu().numpy())
+            # else:
+                # next_obs, rew, done, _ = env.step(action.squeeze(0).cpu().numpy(),action_prime)
+            next_obs, rew, done, _ = env.step(action.squeeze(0).cpu().numpy())
 
             score += rew
 
